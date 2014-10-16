@@ -70,6 +70,14 @@ MKIMAGEFLAGS_u-boot.imx = -n $(filter-out $(PLUGIN).bin $< $(PHONY),$^) -T imxim
 u-boot.imx: u-boot.bin $(IMX_CONFIG) $(PLUGIN).bin FORCE
 	$(call if_changed,mkimage)
 
+ifeq ($(CONFIG_IMX_NAND),y)
+cmd_u-boot-nand_imx = (dd bs=1024 count=1 if=/dev/zero 2>/dev/null) | \
+       cat - $< > $@
+
+u-boot-nand.imx: u-boot.imx FORCE
+	$(call if_changed,u-boot-nand_imx)
+endif
+
 ifeq ($(CONFIG_OF_SEPARATE),y)
 MKIMAGEFLAGS_u-boot-dtb.imx = -n $(filter-out $(PLUGIN).bin $< $(PHONY),$^) -T imximage \
 	-e $(CONFIG_SYS_TEXT_BASE)

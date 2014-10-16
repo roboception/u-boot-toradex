@@ -138,10 +138,14 @@ ifndef CONFIG_SPL_BUILD
 ALL-y += SPL
 endif
 else
+ifeq ($(CONFIG_IMX_NAND),y)
+ALL-y += u-boot-nand.imx
+else
 ifeq ($(CONFIG_OF_SEPARATE),y)
 ALL-y += u-boot-dtb.imx
 else
 ALL-y += u-boot.imx
+endif
 endif
 endif
 ifneq ($(CONFIG_VF610),)
