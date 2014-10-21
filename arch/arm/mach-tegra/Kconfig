@@ -31,7 +31,6 @@ config TEGRA_COMMON
 	select DM_MMC
 	select DM_PWM
 	select DM_RESET
-	select DM_SERIAL
 	select DM_SPI
 	select DM_SPI_FLASH
 	select MISC
@@ -112,6 +111,9 @@ config TEGRA_DISCONNECT_UDC_ON_BOOT
 
 config SYS_MALLOC_F_LEN
 	default 0x1800
+
+config DM_SERIAL
+	default n
 
 source "arch/arm/mach-tegra/tegra20/Kconfig"
 source "arch/arm/mach-tegra/tegra30/Kconfig"
