@@ -1,6 +1,5 @@
 /*
- *  (C) Copyright 2014-2016
- *  Stefan Agner <stefan@agner.ch>
+ * Copyright (c) 2012-2016 Toradex, Inc.
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -19,8 +18,10 @@
 int arch_misc_init(void)
 {
 	if (readl(NV_PA_BASE_SRAM + NVBOOTINFOTABLE_BOOTTYPE) ==
-	    NVBOOTTYPE_RECOVERY)
-		printf("USB recovery mode\n");
+	    NVBOOTTYPE_RECOVERY) {
+		printf("USB recovery mode, disabled autoboot\n");
+		setenv("bootdelay", "-1");
+	}
 
 	return 0;
 }

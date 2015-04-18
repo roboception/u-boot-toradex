@@ -1,6 +1,5 @@
 /*
- *  (C) Copyright 2014-2016
- *  Marcel Ziswiler <marcel@ziswiler.com>
+ * Copyright (c) 2012-2016 Toradex, Inc.
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -25,9 +24,30 @@ DECLARE_GLOBAL_DATA_PTR;
 
 int arch_misc_init(void)
 {
+	/* Default memory arguments */
+	if (!getenv("memargs")) {
+		switch (gd->ram_size) {
+		case 0x40000000:
+			/* 1 GB */
+			setenv("memargs", "vmalloc=128M mem=1012M@2048M "
+					  "fbmem=12M@3060M");
+			break;
+		case 0x7ff00000:
+		case 0x80000000:
+			/* 2 GB */
+			setenv("memargs", "vmalloc=256M mem=2035M@2048M "
+					  "fbmem=12M@4083M");
+			break;
+		default:
+			printf("Failed detecting RAM size.\n");
+		}
+	}
+
 	if (readl(NV_PA_BASE_SRAM + NVBOOTINFOTABLE_BOOTTYPE) ==
-	    NVBOOTTYPE_RECOVERY)
-		printf("USB recovery mode\n");
+	    NVBOOTTYPE_RECOVERY) {
+		printf("USB recovery mode, disabled autoboot\n");
+		setenv("bootdelay", "-1");
+	}
 
 	return 0;
 }
