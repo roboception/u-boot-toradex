@@ -539,18 +539,14 @@ static int nand_rw_page(struct mtd_info *mtd, struct nand_chip *chip,
 			       chip->ecc.layout->oobavail + TAG_ECC_BYTES);
 		tag_size = chip->ecc.layout->oobavail + TAG_ECC_BYTES;
 		reg_val |= (CFG_SKIP_SPARE_SEL_4
-			| CFG_SKIP_SPARE_ENABLE
-			| CFG_HW_ECC_CORRECTION_ENABLE
-			| CFG_ECC_EN_TAG_DISABLE
-			| CFG_HW_ECC_SEL_RS
-			| CFG_HW_ECC_ENABLE
-			| CFG_TVAL4
-			| (tag_size - 1));
+			| CFG_SKIP_SPARE_ENABLE);
 
 		if (!is_writing)
 			tag_size += SKIPPED_SPARE_BYTES;
 		bounce_buffer_start(&bbstate_oob, (void *)tag_ptr, tag_size,
 				    bbflags);
+		writel(virt_to_phys(bbstate_oob.bounce_buffer), &info->reg->tag_ptr);
+		writel(BCH_CONFIG_BCH_TVAL16 | BCH_CONFIG_BCH_ECC_ENABLE, &info->reg->bch_config);
 	} else {
 		tag_size = mtd->oobsize;
 		reg_val |= (CFG_SKIP_SPARE_DISABLE
@@ -560,10 +556,10 @@ static int nand_rw_page(struct mtd_info *mtd, struct nand_chip *chip,
 			| (tag_size - 1));
 		bounce_buffer_start(&bbstate_oob, (void *)chip->oob_poi,
 				    tag_size, bbflags);
+		writel(virt_to_phys(bbstate_oob.bounce_buffer), &info->reg->tag_ptr);
+		writel(BCH_CONFIG_BCH_ECC_DISABLE, &info->reg->bch_config);
 	}
 	writel(reg_val, &info->reg->config);
-	writel(virt_to_phys(bbstate_oob.bounce_buffer), &info->reg->tag_ptr);
-	writel(BCH_CONFIG_BCH_ECC_DISABLE, &info->reg->bch_config);
 	writel(tag_size - 1, &info->reg->dma_cfg_b);
 
 	nand_clear_interrupt_status(info->reg);
@@ -572,7 +568,7 @@ static int nand_rw_page(struct mtd_info *mtd, struct nand_chip *chip,
 		| CMD_SEC_CMD
 		| (CMD_ALE_BYTES5 << CMD_ALE_BYTE_SIZE_SHIFT)
 		| CMD_A_VALID
-		| CMD_B_VALID
+		| (with_ecc ? 0 : CMD_B_VALID)
 		| (CMD_TRANS_SIZE_PAGE << CMD_TRANS_SIZE_SHIFT)
 		| CMD_CE0;
 	if (!is_writing)
@@ -585,7 +581,7 @@ static int nand_rw_page(struct mtd_info *mtd, struct nand_chip *chip,
 	reg_val = DMA_MST_CTRL_GO_ENABLE
 		| DMA_MST_CTRL_BURST_8WORDS
 		| DMA_MST_CTRL_EN_A_ENABLE
-		| DMA_MST_CTRL_EN_B_ENABLE;
+		| (with_ecc ? 0 : DMA_MST_CTRL_EN_B_ENABLE);
 
 	if (!is_writing)
 		reg_val |= DMA_MST_CTRL_DIR_READ;
