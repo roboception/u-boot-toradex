@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2012 Lucas Stach
+ * Copyright (c) 2011-2016 Toradex, Inc.
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -24,6 +24,8 @@ DECLARE_GLOBAL_DATA_PTR;
 #define PMU_SUPPLYENE		0x14
 #define PMU_SUPPLYENE_SYSINEN	(1<<5)
 #define PMU_SUPPLYENE_EXITSLREQ	(1<<1)
+
+u32 get_board_rev(void);
 
 int arch_misc_init(void)
 {
@@ -58,9 +60,63 @@ int arch_misc_init(void)
 	/* make sure SODIMM pin 87 nRESET_OUT is released properly */
 	pinmux_set_func(PMUX_PINGRP_ATA, PMUX_FUNC_GMI);
 
+	/* HW version */
+	if (!getenv("hw-version")) {
+		switch (get_board_rev()) {
+		case 0x011b:
+		case 0x011c:
+			setenv("hw-version", "v11");
+			break;
+		case 0x012a:
+			setenv("hw-version", "v12");
+			break;
+		default:
+			setenv("hw-version", (nand_info[0]->erasesize >> 10
+					      == 512)?"v11":"v12");
+		}
+	}
+
+	/* Default memory arguments */
+	if (!getenv("memargs")) {
+		switch (gd->ram_size) {
+		case 0x10000000:
+			/* 256 MB */
+			setenv("memargs", "mem=148M@0M fbmem=12M@148M "
+			       "nvmem=96M@160M");
+			setenv("ram-size", "256");
+			break;
+		case 0x20000000:
+			/* 512 MB */
+			setenv("memargs", "mem=372M@0M fbmem=12M@372M "
+			       "nvmem=128M@384M");
+			setenv("ram-size", "512");
+			break;
+		default:
+			printf("Failed detecting RAM size.\n");
+		}
+	}
+
+	/* NAND parameters */
+	if (!getenv("leb-size")) {
+		switch (nand_info[0]->erasesize >> 10) {
+		case 256:
+			/* 256 KiB */
+			setenv("leb-size", "248KiB");
+			break;
+		case 512:
+			/* 512 KiB */
+			setenv("leb-size", "504KiB");
+			break;
+		default:
+			printf("Failed detecting NAND block erase size.\n");
+		}
+	}
+
 	if (readl(NV_PA_BASE_SRAM + NVBOOTINFOTABLE_BOOTTYPE) ==
-	    NVBOOTTYPE_RECOVERY)
-		printf("USB recovery mode\n");
+	    NVBOOTTYPE_RECOVERY) {
+		printf("USB recovery mode, disabled autoboot\n");
+		setenv("bootdelay", "-1");
+	}
 
 	return 0;
 }
