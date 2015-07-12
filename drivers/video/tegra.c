@@ -303,14 +303,18 @@ static int tegra_lcd_probe(struct udevice *dev)
 	int ret;
 
 	/* Initialize the Tegra display controller */
+#ifdef CONFIG_TEGRA20
 	funcmux_select(PERIPH_ID_DISP1, FUNCMUX_DEFAULT);
+#endif
 	if (tegra_display_probe(blob, priv, (void *)plat->base)) {
 		printf("%s: Failed to probe display driver\n", __func__);
 		return -1;
 	}
 
+#ifdef CONFIG_TEGRA20
 	pinmux_set_func(PMUX_PINGRP_GPU, PMUX_FUNC_PWM);
 	pinmux_tristate_disable(PMUX_PINGRP_GPU);
+#endif
 
 	ret = panel_enable_backlight(priv->panel);
 	if (ret) {
