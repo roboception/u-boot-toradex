@@ -59,6 +59,33 @@
 		};
 	};
 
+	host1x@50000000 {
+		dc@54200000 {
+			rgb {
+				status = "okay";
+				nvidia,panel = <&lcd_panel>;
+				display-timings {
+					timing@0 {
+						/* VESA VGA */
+						clock-frequency = <25175000>;
+						hactive = <640>;
+						vactive = <480>;
+						hback-porch = <48>;
+						hfront-porch = <16>;
+						hsync-len = <96>;
+						vback-porch = <31>;
+						vfront-porch = <11>;
+						vsync-len = <2>;
+					};
+				};
+			};
+		};
+	};
+
+	pwm@7000a000 {
+		status = "okay";
+	};
+
 	/*
 	 * GEN1_I2C: I2C1_SDA/SCL on MXM3 pin 209/211 (e.g. RTC on carrier
 	 * board)
@@ -288,6 +315,18 @@
 		nvidia,vbus-gpio = <&gpio TEGRA_GPIO(DD, 1) GPIO_ACTIVE_HIGH>;
 	};
 
+	backlight: backlight {
+		compatible = "pwm-backlight";
+
+		brightness-levels = <255 128 64 32 16 8 4 0>;
+		default-brightness-level = <6>;
+		/* BKL1_ON */
+		enable-gpios = <&gpio TEGRA_GPIO(V, 2) GPIO_ACTIVE_HIGH>;
+		power-supply = <&sys_3v3_reg>;
+		/* PWM_BKL1 */
+		pwms = <&pwm 0 5000000>;
+	};
+
 	clocks {
 		compatible = "simple-bus";
 		#address-cells = <1>;
@@ -306,6 +345,16 @@
 			clock-frequency = <16000000>;
 			clock-output-names = "clk16m";
 		};
+	};
+
+	lcd_panel: panel {
+		/*
+		 * edt,et057090dhu: EDT 5.7" LCD TFT
+		 * edt,et070080dh6: EDT 7.0" LCD TFT
+		 */
+		compatible = "edt,et057090dhu", "simple-panel";
+
+		backlight = <&backlight>;
 	};
 
 	regulators {

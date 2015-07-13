@@ -62,6 +62,11 @@
 #define CONFIG_TFTP_BLOCKSIZE		16352
 #define CONFIG_TFTP_TSIZE
 
+/* LCD support */
+#define CONFIG_SYS_WHITE_ON_BLACK
+#define CONFIG_CMD_BMP
+#define CONFIG_LCD_LOGO
+
 /* Miscellaneous commands */
 #define CONFIG_FAT_WRITE
 
