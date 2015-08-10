@@ -130,8 +130,8 @@
 	"kernel_addr_r=0x82000000\0" \
 	"fdt_addr_r=0x84000000\0" \
 	"kernel_file=zImage\0" \
-	"fdt_file=${soc}-colibri-${fdt_board}.dtb\0" \
 	"fdt_board=eval-v3\0" \
+	"fdt_file=${soc}-colibri-${fdt_board}.dtb\0" \
 	"fdt_fixup=;\0" \
 	"defargs=\0" \
 	"console=ttyLP0\0" \
