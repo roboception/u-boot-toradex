@@ -14,6 +14,8 @@
 #undef CONFIG_SYS_DCACHE_OFF		/* breaks L4T kernel boot */
 #define CONFIG_ARCH_MISC_INIT
 
+#define CONFIG_TEGRA_EARLY_TPS6586X
+
 /* High-level configuration options */
 #define CONFIG_DISPLAY_BOARDINFO_LATE	/* Calls show_board_info() */
 
