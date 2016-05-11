@@ -56,6 +56,7 @@
 /* PCI host support */
 #undef CONFIG_PCI_SCAN_SHOW
 #define CONFIG_CMD_PCI
+#undef APALIS_T30_PCIE_EVALBOARD_INIT
 
 /* PCI networking support */
 #define CONFIG_E1000_NO_NVM
