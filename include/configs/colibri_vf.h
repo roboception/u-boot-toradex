@@ -94,6 +94,13 @@
 #define CONFIG_SYS_TEXT_BASE		0x3f408000
 #define CONFIG_BOARD_SIZE_LIMIT		524288
 
+#define MEM_LAYOUT_ENV_SETTINGS \
+	"fdt_addr_r=0x82000000\0" \
+	"fdt_high=0xffffffff\0" \
+	"initrd_high=0xffffffff\0" \
+	"kernel_addr_r=0x81000000\0" \
+	"ramdisk_addr_r=0x82100000\0"
+
 #define SD_BOOTCMD \
 	"sdargs=root=/dev/mmcblk0p2 rw rootwait\0"	\
 	"sdboot=run setup; setenv bootargs ${defargs} ${sdargs} ${mtdparts} " \
@@ -127,8 +134,6 @@
 #define DFU_ALT_NAND_INFO "vf-bcb part 0,1;u-boot part 0,2;ubi part 0,4"
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"kernel_addr_r=0x82000000\0" \
-	"fdt_addr_r=0x84000000\0" \
 	"kernel_file=zImage\0" \
 	"fdt_board=eval-v3\0" \
 	"fdt_file=${soc}-colibri-${fdt_board}.dtb\0" \
@@ -148,6 +153,7 @@
 	"00:14:2d:00:00:00; fi; tftpboot ${loadaddr} " \
 	"flash_eth.img && source ${loadaddr}\0" \
 	"setupdate=run setsdupdate || run setusbupdate || run setethupdate\0" \
+	MEM_LAYOUT_ENV_SETTINGS \
 	"mtdparts=" MTDPARTS_DEFAULT "\0" \
 	"dfu_alt_info=" DFU_ALT_NAND_INFO "\0" \
 	SD_BOOTCMD \
