@@ -319,6 +319,9 @@ struct boot_device_name boot_name_table[] = {
 #ifdef CONFIG_SPL_DFU_SUPPORT
 	{ BOOT_DEVICE_DFU, "USB DFU" },
 #endif
+#ifdef CONFIG_SPL_USB_SDP_SUPPORT
+	{ BOOT_DEVICE_SDP, "USB SDP" },
+#endif
 #ifdef CONFIG_SPL_SATA_SUPPORT
 	{ BOOT_DEVICE_SATA, "SATA" },
 #endif
