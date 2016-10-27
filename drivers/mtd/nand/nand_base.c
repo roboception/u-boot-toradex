@@ -4216,6 +4216,11 @@ int nand_scan_tail(struct mtd_info *mtd)
 	if (!mtd->bitflip_threshold)
 		mtd->bitflip_threshold = DIV_ROUND_UP(mtd->ecc_strength * 3, 4);
 
+	if (chip->options & NAND_NEED_BBTSCAN) {
+		chip->options |= NAND_BBT_SCANNED;
+		return chip->scan_bbt(mtd);
+	}
+
 	return 0;
 }
 EXPORT_SYMBOL(nand_scan_tail);

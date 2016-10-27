@@ -1181,7 +1181,7 @@ int board_nand_init(struct nand_chip *nand)
 	memset(&fake_ecc_layout, 0, sizeof(fake_ecc_layout));
 
 	nand_set_controller_data(nand, nand_info);
-	nand->options |= NAND_NO_SUBPAGE_WRITE;
+	nand->options |= NAND_NO_SUBPAGE_WRITE | NAND_NEED_BBTSCAN;
 
 	nand->cmd_ctrl		= mxs_nand_cmd_ctrl;
 

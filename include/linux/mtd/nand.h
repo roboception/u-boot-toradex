@@ -224,6 +224,8 @@ typedef enum {
  * kmap'ed, vmalloc'ed highmem buffers being passed from upper layers
  */
 #define NAND_USE_BOUNCE_BUFFER	0x00100000
+/* Chip needs BBT scan */
+#define NAND_NEED_BBTSCAN	0x00200000
 
 /* Options set by nand scan */
 /* bbt has already been read */
