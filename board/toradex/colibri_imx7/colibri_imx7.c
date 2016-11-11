@@ -16,6 +16,7 @@
 #include <common.h>
 #include <dm.h>
 #include <dm/platform_data/serial_mxc.h>
+#include <fdt_support.h>
 #include <fsl_esdhc.h>
 #include <linux/sizes.h>
 #include <mmc.h>
@@ -391,6 +392,43 @@ int checkboard(void)
 #if defined(CONFIG_OF_LIBFDT) && defined(CONFIG_OF_BOARD_SETUP)
 int ft_board_setup(void *blob, bd_t *bd)
 {
+#if defined(CONFIG_IMX_BOOTAUX)
+	int up;
+
+	up = arch_auxiliary_core_check_up(0);
+	if (up) {
+		int ret;
+		int areas = 1;
+		u64 start[2], size[2];
+
+		/*
+		 * Reserve 1MB of memory for M4 (1MiB is also the minimum
+		 * alignment for Linux due to MMU section size restrictions).
+		 */
+		start[0] = gd->bd->bi_dram[0].start;
+		size[0] = SZ_256M - SZ_1M;
+
+		/* If needed, create a second entry for memory beyond 256M */
+		if (gd->bd->bi_dram[0].size > SZ_256M) {
+			start[1] = gd->bd->bi_dram[0].start + SZ_256M;
+			size[1] = gd->bd->bi_dram[0].size - SZ_256M;
+			areas = 2;
+		}
+
+		ret = fdt_set_usable_memory(blob, start, size, areas);
+		if (ret) {
+			eprintf("Cannot set usable memory\n");
+			return ret;
+		}
+	} else {
+		int off;
+
+		off = fdt_node_offset_by_compatible(blob, -1, "fsl,imx7d-rpmsg");
+		if (off > 0)
+			fdt_status_disabled(blob, off);
+	}
+#endif
+
 	return ft_common_board_setup(blob, bd);
 }
 #endif
