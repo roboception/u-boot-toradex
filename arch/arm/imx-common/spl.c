@@ -28,7 +28,7 @@ u32 spl_boot_device(void)
 	 */
 	if ((((bmode >> 24) & 0x03)  == 0x01) || /* Serial Downloader */
 		(gpr10_boot && (reg == 1)))
-		return BOOT_DEVICE_UART;
+		return BOOT_DEVICE_SDP;
 	/* BOOT_CFG1[7:4] - see IMX6DQRM Table 8-8 */
 	switch ((reg & 0x000000FF) >> 4) {
 	 /* EIM: See 8.5.1, Table 8-9 */
