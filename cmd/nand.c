@@ -304,8 +304,8 @@ static void nand_print_and_set_info(int idx)
 	setenv_hex("nand_erasesize", mtd->erasesize);
 }
 
-static int raw_access(struct mtd_info *mtd, ulong addr, loff_t off,
-		      ulong count, int read, int no_verify)
+int raw_access(struct mtd_info *mtd, ulong addr, loff_t off,
+	       ulong count, int read, int no_verify)
 {
 	int ret = 0;
 

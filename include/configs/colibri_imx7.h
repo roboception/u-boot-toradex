@@ -175,6 +175,8 @@
 #endif
 
 #define CONFIG_NAND_MXS
+#define CONFIG_BCH
+#define CONFIG_CMD_WRITEBCB_MX7
 #define CONFIG_CMD_NAND_TRIMFFS
 
 /* NAND stuff */
