@@ -133,6 +133,7 @@
 		"${board}/flash_blk.img && source ${loadaddr}\0" \
 	"splashpos=m,m\0" \
 	"videomode=video=ctfb:x:640,y:480,depth:18,pclk:39722,le:48,ri:16,up:33,lo:10,hs:96,vs:2,sync:0,vmode:0\0" \
+	"updlevel=2\0"
 
 /* Miscellaneous configurable options */
 #define CONFIG_SYS_LONGHELP
@@ -168,8 +169,8 @@
 #define CONFIG_MMCROOT			"/dev/mmcblk0p2"  /* USDHC1 */
 #define CONFIG_ENV_OFFSET		(8 * SZ_64K)
 #elif defined(CONFIG_ENV_IS_IN_NAND)
-#define CONFIG_ENV_OFFSET		(4 * 1024 * 1024)
 #define CONFIG_ENV_SECT_SIZE		(128 * 1024)
+#define CONFIG_ENV_OFFSET		(28 * CONFIG_ENV_SECT_SIZE)
 #define CONFIG_ENV_SIZE			CONFIG_ENV_SECT_SIZE
 #endif
 
@@ -196,7 +197,8 @@
 #define MTDIDS_DEFAULT		"nand0=gpmi-nand"
 #define MTDPARTS_DEFAULT	"mtdparts=gpmi-nand:"		\
 				"512k(mx7-bcb),"		\
-				"3584k(u-boot)ro,"		\
+				"1536k(u-boot1)ro,"		\
+				"1536k(u-boot2)ro,"		\
 				"512k(u-boot-env),"		\
 				"-(ubi)"
 
