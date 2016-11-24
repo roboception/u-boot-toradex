@@ -50,6 +50,8 @@ void init_aips(void);
 void init_src(void);
 void imx_set_wdog_powerdown(bool enable);
 
+int arch_auxiliary_core_check_up(u32 core_id);
+
 /*
  * Initializes on-chip ethernet controllers.
  * to override, implement board_eth_init()
