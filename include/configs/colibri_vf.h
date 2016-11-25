@@ -143,7 +143,10 @@
 	"setusbupdate=usb start && set interface usb && " \
 	"fatload ${interface} 0:1 ${loadaddr} flash_blk.img && " \
 	"source ${loadaddr}\0" \
-	"setupdate=run setsdupdate || run setusbupdate\0" \
+	"setethupdate=if env exists ethaddr; then; else setenv ethaddr " \
+	"00:14:2d:00:00:00; fi; tftpboot ${loadaddr} " \
+	"flash_eth.img && source ${loadaddr}\0" \
+	"setupdate=run setsdupdate || run setusbupdate || run setethupdate\0" \
 	"mtdparts=" MTDPARTS_DEFAULT "\0" \
 	"dfu_alt_info=" DFU_ALT_NAND_INFO "\0" \
 	SD_BOOTCMD \
