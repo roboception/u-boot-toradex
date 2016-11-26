@@ -389,6 +389,17 @@ int checkboard(void)
 	return 0;
 }
 
+#if defined(CONFIG_IMX_BOOTAUX)
+ulong board_get_usable_ram_top(ulong total_size)
+{
+	/* Reserve last 1MiB for M4 on modules with 256MiB RAM */
+	if (gd->ram_size == SZ_256M)
+		return gd->ram_top - SZ_1M;
+	else
+		return gd->ram_top;
+}
+#endif
+
 #if defined(CONFIG_OF_LIBFDT) && defined(CONFIG_OF_BOARD_SETUP)
 int ft_board_setup(void *blob, bd_t *bd)
 {
