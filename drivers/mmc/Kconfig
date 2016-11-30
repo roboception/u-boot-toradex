@@ -101,4 +101,12 @@ config TEGRA_MMC
 	help
 	  This selects support for SDHCI on Tegra SoCs.
 
+config TEGRA124_MMC_DISABLE_EXT_LOOPBACK
+	bool "Disable external clock loopback"
+	depends on TEGRA_MMC && TEGRA124
+	help
+	  Disable the external clock loopback and use the internal one on SDMMC3
+	  as per the SDMMC_VENDOR_MISC_CNTRL_0 register's SDMMC_SPARE1 bits
+	  being set to 0xfffd according to the TRM.
+
 endmenu
