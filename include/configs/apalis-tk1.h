@@ -31,7 +31,6 @@
 /* SD/MMC support */
 #define CONFIG_MMC
 #define CONFIG_GENERIC_MMC
-#define CONFIG_TEGRA_MMC
 #define CONFIG_SUPPORT_EMMC_BOOT	/* eMMC specific */
 
 /* Environment in eMMC, before config block at the end of 1st "boot sector" */
