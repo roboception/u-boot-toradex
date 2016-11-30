@@ -34,7 +34,6 @@
 #define CONFIG_SYS_MALLOC_LEN		(32 * SZ_1M)
 
 #define CONFIG_CMD_BMODE
-
 /* Network */
 #define CONFIG_FEC_MXC
 #define CONFIG_MII
@@ -72,7 +71,9 @@
 	"fdt_high=0xffffffff\0" \
 	"initrd_high=0xffffffff\0" \
 	"kernel_addr_r=0x81000000\0" \
-	"ramdisk_addr_r=0x82100000\0"
+	"pxefile_addr_r=0x87100000\0" \
+	"ramdisk_addr_r=0x82100000\0" \
+	"scriptaddr=0x87000000\0"
 
 #define SD_BOOTCMD \
 	"sdargs=root=/dev/mmcblk0p2 rw rootwait\0"	\
@@ -103,9 +104,17 @@
 		"ubi read ${fdt_addr_r} dtb && " \
 		"run fdt_fixup && bootz ${kernel_addr_r} - ${fdt_addr_r}\0" \
 
-#define CONFIG_BOOTCOMMAND "run ubiboot; run sdboot; run nfsboot"
+#define CONFIG_BOOTCOMMAND "run ubiboot; run distro_bootcmd;"
+
+#define BOOT_TARGET_DEVICES(func) \
+	func(MMC, mmc, 0) \
+	func(USB, usb, 0) \
+	func(DHCP, dhcp, na)
+#include <config_distro_bootcmd.h>
+#include <config_distro_defaults.h>
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
+	BOOTENV \
 	MEM_LAYOUT_ENV_SETTINGS \
 	NFS_BOOTCMD \
 	SD_BOOTCMD \

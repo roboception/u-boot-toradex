@@ -123,7 +123,9 @@
 	"fdt_high=0xffffffff\0" \
 	"initrd_high=0xffffffff\0" \
 	"kernel_addr_r=0x81000000\0" \
-	"ramdisk_addr_r=0x82100000\0"
+	"pxefile_addr_r=0x87100000\0" \
+	"ramdisk_addr_r=0x82100000\0" \
+	"scriptaddr=0x87000000\0"
 
 #define SD_BOOTCMD \
 	"sdargs=root=/dev/mmcblk0p2 rw rootwait\0"	\
@@ -153,11 +155,20 @@
 	"ubi read ${fdt_addr_r} dtb && " \
 	"run fdt_fixup && bootz ${kernel_addr_r} - ${fdt_addr_r}\0" \
 
-#define CONFIG_BOOTCOMMAND "run ubiboot; run sdboot; run nfsboot"
+#define CONFIG_BOOTCOMMAND "run ubiboot; run distro_bootcmd;"
+
+#define BOOTENV_RUN_NET_USB_START ""
+#define BOOT_TARGET_DEVICES(func) \
+	func(MMC, mmc, 0) \
+	func(USB, usb, 0) \
+	func(DHCP, dhcp, na)
+#include <config_distro_bootcmd.h>
+#include <config_distro_defaults.h>
 
 #define DFU_ALT_NAND_INFO "vf-bcb part 0,1;u-boot part 0,2;ubi part 0,4"
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
+	BOOTENV \
 	"kernel_file=zImage\0" \
 	"fdt_board=eval-v3\0" \
 	"fdt_file=${soc}-colibri-${fdt_board}.dtb\0" \
