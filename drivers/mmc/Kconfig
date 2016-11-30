@@ -95,4 +95,10 @@ config SANDBOX_MMC
 	  improves build coverage for sandbox and makes it easier to detect
 	  MMC build errors with sandbox.
 
+config TEGRA_MMC
+	bool "Tegra SDHCI aka MMC support"
+	depends on DM_MMC && TEGRA
+	help
+	  This selects support for SDHCI on Tegra SoCs.
+
 endmenu
