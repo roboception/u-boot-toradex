@@ -212,7 +212,9 @@
 #endif
 
 #ifdef CONFIG_CMD_USB
+#ifndef BOOTENV_RUN_NET_USB_START
 #define BOOTENV_RUN_NET_USB_START "run boot_net_usb_start; "
+#endif
 #define BOOTENV_SHARED_USB \
 	"boot_net_usb_start=usb start\0" \
 	"usb_boot=" \
