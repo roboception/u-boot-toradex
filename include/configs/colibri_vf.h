@@ -180,6 +180,8 @@
 	MEM_LAYOUT_ENV_SETTINGS \
 	"mtdparts=" MTDPARTS_DEFAULT "\0" \
 	"dfu_alt_info=" DFU_ALT_NAND_INFO "\0" \
+	"video-mode=dcufb:640x480-16@60,monitor=lcd\0" \
+	"splashpos=m,m\0" \
 	SD_BOOTCMD \
 	NFS_BOOTCMD \
 	UBI_BOOTCMD
