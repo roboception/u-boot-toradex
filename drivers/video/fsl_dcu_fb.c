@@ -136,6 +136,38 @@ static struct fb_videomode fsl_dcu_mode_640_480 = {
 	.vmode		= FB_VMODE_NONINTERLACED,
 };
 
+static struct fb_videomode fsl_dcu_mode_800_480 = {
+	.name		= "800x480-60",
+	.refresh	= 60,
+	.xres		= 800,
+	.yres		= 480,
+	.pixclock	= 33260,
+	.left_margin	= 216,
+	.right_margin	= 40,
+	.upper_margin	= 35,
+	.lower_margin	= 10,
+	.hsync_len	= 128,
+	.vsync_len	= 2,
+	.sync		= 0,
+	.vmode		= FB_VMODE_NONINTERLACED,
+};
+
+static struct fb_videomode fsl_dcu_mode_1024_600 = {
+	.name		= "1024x600-60",
+	.refresh	= 60,
+	.xres		= 1024,
+	.yres		= 600,
+	.pixclock	= 48000,
+	.left_margin	= 104,
+	.right_margin	= 43,
+	.upper_margin	= 24,
+	.lower_margin	= 20,
+	.hsync_len	= 5,
+	.vsync_len	= 5,
+	.sync		= 0,
+	.vmode		= FB_VMODE_NONINTERLACED,
+};
+
 /*
  * DCU register map
  */
@@ -364,6 +396,12 @@ void *video_hw_init(void)
 			fsl_dcu_mode_db = &fsl_dcu_cea_mode_640_480;
 		else
 			fsl_dcu_mode_db = &fsl_dcu_mode_640_480;
+		break;
+	case RESOLUTION(800, 480):
+		fsl_dcu_mode_db = &fsl_dcu_mode_800_480;
+		break;
+	case RESOLUTION(1024, 600):
+		fsl_dcu_mode_db = &fsl_dcu_mode_1024_600;
 		break;
 	default:
 		printf("unsupported resolution %ux%u\n",
