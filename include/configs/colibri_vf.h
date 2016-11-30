@@ -13,6 +13,7 @@
 #define __CONFIG_H
 
 #include <asm/arch/imx-regs.h>
+#include <linux/sizes.h>
 
 #define CONFIG_VF610
 #define CONFIG_SYS_THUMB_BUILD
@@ -48,6 +49,7 @@
 
 #define CONFIG_SYS_FSL_DCU_LE
 #define CONFIG_SYS_DCU_ADDR		DCU0_BASE_ADDR
+#define CONFIG_FSL_DCU_MAX_FB_SIZE	SZ_4M
 #define DCU_TOTAL_LAYER_NUM		64
 #define DCU_LAYER_MAX_NUM		6
 #endif
@@ -202,7 +204,7 @@
  * Stack sizes
  * The stack sizes are set up in start.S using the settings below
  */
-#define CONFIG_STACKSIZE		(128 * 1024)	/* regular stack */
+#define CONFIG_STACKSIZE		SZ_256K
 
 /* Physical memory map */
 #define CONFIG_NR_DRAM_BANKS		1
