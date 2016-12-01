@@ -148,7 +148,7 @@ ALL-y += u-boot.imx
 endif
 endif
 endif
-ifneq ($(CONFIG_VF610),)
+ifneq ($(CONFIG_TARGET_PCM052),)
 ALL-y += u-boot.vyb
 endif
 endif
