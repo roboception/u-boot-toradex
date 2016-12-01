@@ -155,7 +155,8 @@
 	"ubi read ${fdt_addr_r} dtb && " \
 	"run fdt_fixup && bootz ${kernel_addr_r} - ${fdt_addr_r}\0" \
 
-#define CONFIG_BOOTCOMMAND "run ubiboot; run distro_bootcmd;"
+#define CONFIG_BOOTCOMMAND "run ubiboot; " \
+	"setenv fdtfile ${soc}-colibri-${fdt_board}.dtb && run distro_bootcmd;"
 
 #define BOOTENV_RUN_NET_USB_START ""
 #define BOOT_TARGET_DEVICES(func) \
@@ -171,7 +172,6 @@
 	BOOTENV \
 	"kernel_file=zImage\0" \
 	"fdt_board=eval-v3\0" \
-	"fdt_file=${soc}-colibri-${fdt_board}.dtb\0" \
 	"fdt_fixup=;\0" \
 	"defargs=\0" \
 	"console=ttyLP0\0" \
