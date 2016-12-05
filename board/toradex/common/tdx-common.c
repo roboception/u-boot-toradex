@@ -152,9 +152,10 @@ u32 get_board_rev(void)
 #endif /* CONFIG_REVISION_TAG */
 
 #ifdef CONFIG_SERIAL_TAG
-u32 get_board_serial(void)
+void get_board_serial(struct tag_serialnr *serialnr)
 {
-	return 0;
+	serialnr->low = 0;
+	serialnr->high = 0;
 }
 #endif /* CONFIG_SERIAL_TAG */
 
