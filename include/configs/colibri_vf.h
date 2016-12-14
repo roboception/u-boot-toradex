@@ -104,6 +104,9 @@
 #define CONFIG_FEC_MXC_PHYADDR          0
 #define CONFIG_PHYLIB
 #define CONFIG_PHY_MICREL
+#define CONFIG_IP_DEFRAG
+#define CONFIG_TFTP_BLOCKSIZE		16352
+#define CONFIG_TFTP_TSIZE
 
 #define CONFIG_IPADDR		192.168.10.2
 #define CONFIG_NETMASK		255.255.255.0
@@ -129,31 +132,31 @@
 
 #define SD_BOOTCMD \
 	"sdargs=root=/dev/mmcblk0p2 rw rootwait\0"	\
-	"sdboot=run setup; setenv bootargs ${defargs} ${sdargs} ${mtdparts} " \
+	"sdboot=run setup; setenv bootargs ${defargs} ${sdargs} " \
 	"${setupargs} ${vidargs}; echo Booting from MMC/SD card...; " \
-	"load mmc 0:2 ${kernel_addr_r} /boot/${kernel_file} && " \
-	"load mmc 0:2 ${fdt_addr_r} /boot/${soc}-colibri-${fdt_board}.dtb && " \
+		"load mmc 0:2 ${kernel_addr_r} /boot/${kernel_file} && " \
+		"load mmc 0:2 ${fdt_addr_r} /boot/${soc}-colibri-${fdt_board}.dtb && " \
 	"run fdt_fixup && bootz ${kernel_addr_r} - ${fdt_addr_r}\0" \
 
 #define NFS_BOOTCMD \
 	"nfsargs=ip=:::::eth0: root=/dev/nfs\0"	\
 	"nfsboot=run setup; " \
-	"setenv bootargs ${defargs} ${nfsargs} ${mtdparts} " \
-	"${setupargs} ${vidargs}; echo Booting from NFS...;" \
-	"dhcp ${kernel_addr_r} && "	\
-	"tftp ${fdt_addr_r} ${soc}-colibri-${fdt_board}.dtb && " \
-	"run fdt_fixup && bootz ${kernel_addr_r} - ${fdt_addr_r}\0" \
+		"setenv bootargs ${defargs} ${nfsargs} " \
+		"${setupargs} ${vidargs}; echo Booting from NFS...;" \
+		"dhcp ${kernel_addr_r} && "	\
+		"tftp ${fdt_addr_r} ${soc}-colibri-${fdt_board}.dtb && " \
+		"run fdt_fixup && bootz ${kernel_addr_r} - ${fdt_addr_r}\0" \
 
 #define UBI_BOOTCMD	\
 	"ubiargs=ubi.mtd=ubi root=ubi0:rootfs rootfstype=ubifs " \
-	"ubi.fm_autoconvert=1\0" \
+		"ubi.fm_autoconvert=1\0" \
 	"ubiboot=run setup; " \
-	"setenv bootargs ${defargs} ${ubiargs} ${mtdparts} "   \
-	"${setupargs} ${vidargs}; echo Booting from NAND...; " \
-	"ubi part ubi && " \
-	"ubi read ${kernel_addr_r} kernel && " \
-	"ubi read ${fdt_addr_r} dtb && " \
-	"run fdt_fixup && bootz ${kernel_addr_r} - ${fdt_addr_r}\0" \
+		"setenv bootargs ${defargs} ${ubiargs} " \
+		"${setupargs} ${vidargs}; echo Booting from NAND...; " \
+		"ubi part ubi && " \
+		"ubi read ${kernel_addr_r} kernel && " \
+		"ubi read ${fdt_addr_r} dtb && " \
+		"run fdt_fixup && bootz ${kernel_addr_r} - ${fdt_addr_r}\0" \
 
 #define CONFIG_BOOTCOMMAND "run ubiboot; " \
 	"setenv fdtfile ${soc}-colibri-${fdt_board}.dtb && run distro_bootcmd;"
@@ -170,32 +173,32 @@
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	BOOTENV \
-	"kernel_file=zImage\0" \
+	MEM_LAYOUT_ENV_SETTINGS \
+	NFS_BOOTCMD \
+	SD_BOOTCMD \
+	UBI_BOOTCMD \
+	"console=ttyLP0\0" \
+	"defargs=\0" \
+	"dfu_alt_info=" DFU_ALT_NAND_INFO "\0" \
 	"fdt_board=eval-v3\0" \
 	"fdt_fixup=;\0" \
-	"defargs=\0" \
-	"console=ttyLP0\0" \
-	"setup=setenv setupargs " \
-	"console=tty1 console=${console}" \
-	",${baudrate}n8 ${memargs}\0" \
-	"setsdupdate=mmc rescan && set interface mmc && " \
-	"fatload ${interface} 0:1 ${loadaddr} flash_blk.img && " \
-	"source ${loadaddr}\0" \
-	"setusbupdate=usb start && set interface usb && " \
-	"fatload ${interface} 0:1 ${loadaddr} flash_blk.img && " \
-	"source ${loadaddr}\0" \
-	"setethupdate=if env exists ethaddr; then; else setenv ethaddr " \
-	"00:14:2d:00:00:00; fi; tftpboot ${loadaddr} " \
-	"flash_eth.img && source ${loadaddr}\0" \
-	"setupdate=run setsdupdate || run setusbupdate || run setethupdate\0" \
-	MEM_LAYOUT_ENV_SETTINGS \
+	"kernel_file=zImage\0" \
 	"mtdparts=" MTDPARTS_DEFAULT "\0" \
-	"dfu_alt_info=" DFU_ALT_NAND_INFO "\0" \
-	"video-mode=dcufb:640x480-16@60,monitor=lcd\0" \
+	"setethupdate=if env exists ethaddr; then; else setenv ethaddr " \
+		"00:14:2d:00:00:00; fi; tftpboot ${loadaddr} " \
+		"${board}/flash_eth.img && source ${loadaddr}\0" \
+	"setsdupdate=mmc rescan && setenv interface mmc && " \
+		"fatload ${interface} 0:1 ${loadaddr} " \
+		"${board}/flash_blk.img && source ${loadaddr}\0" \
+	"setup=setenv setupargs " \
+		"console=tty1 console=${console}" \
+		",${baudrate}n8 ${memargs} consoleblank=0 ${mtdparts}\0" \
+	"setupdate=run setsdupdate || run setusbupdate || run setethupdate\0" \
+	"setusbupdate=usb start && setenv interface usb && " \
+		"fatload ${interface} 0:1 ${loadaddr} " \
+		"${board}/flash_blk.img && source ${loadaddr}\0" \
 	"splashpos=m,m\0" \
-	SD_BOOTCMD \
-	NFS_BOOTCMD \
-	UBI_BOOTCMD
+	"video-mode=dcufb:640x480-16@60,monitor=lcd\0"
 
 /* Miscellaneous configurable options */
 #define CONFIG_SYS_LONGHELP		/* undef to save memory */
@@ -247,8 +250,6 @@
 #define CONFIG_ENV_RANGE		(4 * 64 * 2048)
 #define CONFIG_ENV_OFFSET		(12 * 64 * 2048)
 #endif
-
-#define CONFIG_SYS_NO_FLASH
 
 /* USB Host Support */
 #define CONFIG_USB_EHCI
