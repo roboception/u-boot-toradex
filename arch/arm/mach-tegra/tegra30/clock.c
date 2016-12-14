@@ -797,6 +797,7 @@ int tegra_plle_enable(void)
 }
 
 struct periph_clk_init periph_clk_init_table[] = {
+#if !defined(CONFIG_TARGET_APALIS_T30) && !defined(CONFIG_TARGET_COLIBRI_T30)
 	{ PERIPH_ID_SBC1, CLOCK_ID_PERIPH },
 	{ PERIPH_ID_SBC2, CLOCK_ID_PERIPH },
 	{ PERIPH_ID_SBC3, CLOCK_ID_PERIPH },
@@ -805,6 +806,7 @@ struct periph_clk_init periph_clk_init_table[] = {
 	{ PERIPH_ID_SBC6, CLOCK_ID_PERIPH },
 	{ PERIPH_ID_HOST1X, CLOCK_ID_PERIPH },
 	{ PERIPH_ID_DISP1, CLOCK_ID_CGENERAL },
+#endif /* !CONFIG_TARGET_APALIS_T30 && !CONFIG_TARGET_COLIBRI_T30 */
 	{ PERIPH_ID_NDFLASH, CLOCK_ID_PERIPH },
 	{ PERIPH_ID_SDMMC1, CLOCK_ID_PERIPH },
 	{ PERIPH_ID_SDMMC2, CLOCK_ID_PERIPH },
