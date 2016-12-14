@@ -107,6 +107,7 @@
 #define CONFIG_BOOTCOMMAND "run ubiboot; " \
 	"setenv fdtfile ${soc}-colibri-${fdt_board}.dtb && run distro_bootcmd;"
 
+#define BOOTENV_RUN_NET_USB_START ""
 #define BOOT_TARGET_DEVICES(func) \
 	func(MMC, mmc, 0) \
 	func(USB, usb, 0) \
