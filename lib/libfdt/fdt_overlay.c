@@ -495,9 +495,9 @@ static int overlay_fixup_phandles(void *fdt, void *fdto)
 	if ((fixups_off < 0 && (fixups_off != -FDT_ERR_NOTFOUND)))
 		return fixups_off;
 
-	/* And base DTs without symbols */
+	/* But if we need to fixup phandles, symbols are required */
 	symbols_off = fdt_path_offset(fdt, "/__symbols__");
-	if ((symbols_off < 0 && (symbols_off != -FDT_ERR_NOTFOUND)))
+	if (symbols_off < 0)
 		return symbols_off;
 
 	fdt_for_each_property_offset(property, fdto, fixups_off) {
