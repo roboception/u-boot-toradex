@@ -20,7 +20,6 @@
 #include <asm/gpio.h>
 #include <asm/imx-common/iomux-v3.h>
 #include <asm/imx-common/mxc_i2c.h>
-#include <asm/imx-common/sata.h>
 #include <asm/imx-common/boot_mode.h>
 #include <asm/imx-common/video.h>
 #include <asm/io.h>
@@ -658,10 +657,6 @@ int board_init(void)
 
 #ifdef CONFIG_TDX_CMD_IMX_MFGR
 	(void) pmic_init();
-#endif
-
-#ifdef CONFIG_CMD_SATA
-	setup_sata();
 #endif
 
 	setup_iomux_gpio();
