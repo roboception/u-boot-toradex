@@ -20,8 +20,10 @@
 int arch_misc_init(void)
 {
 	if (readl(NV_PA_BASE_SRAM + NVBOOTINFOTABLE_BOOTTYPE) ==
-	    NVBOOTTYPE_RECOVERY)
-		printf("USB recovery mode\n");
+	    NVBOOTTYPE_RECOVERY) {
+		printf("USB recovery mode, disabled autoboot\n");
+		setenv("bootdelay", "-1");
+	}
 
 	return 0;
 }
