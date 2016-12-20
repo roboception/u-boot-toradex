@@ -99,10 +99,8 @@
 #define CONFIG_SERVERIP		192.168.10.1
 
 #define CONFIG_BOOTCOMMAND \
-	"run ubiboot; echo; echo ubiboot failed; " \
-	"run sdboot; echo; echo sdboot failed; " \
-	"run usbboot; echo; echo usbboot failed; " \
-	"run nfsboot; echo; echo nfsboot failed"
+	"run ubiboot; setenv fdtfile ${soc}-colibri-${fdt_board}.dtb && " \
+		"run distro_bootcmd"
 
 #define DFU_ALT_NAND_INFO	"u-boot part 0,0;ubi part 0,3"
 

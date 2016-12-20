@@ -66,10 +66,8 @@
 #define CONFIG_SERVERIP		192.168.10.1
 
 #define CONFIG_BOOTCOMMAND \
-	"run emmcboot; echo; echo emmcboot failed; " \
-	"run sdboot; echo; echo sdboot failed; " \
-	"run usbboot; echo; echo usbboot failed; " \
-	"run nfsboot; echo; echo nfsboot failed"
+	"run emmcboot; setenv fdtfile ${soc}-apalis-${fdt_board}.dtb && " \
+		"run distro_bootcmd"
 
 #define DFU_ALT_EMMC_INFO	"apalis-tk1.img raw 0x0 0x500 mmcpart 1; " \
 				"boot part 0 1 mmcpart 0; " \
