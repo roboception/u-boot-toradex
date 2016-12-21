@@ -94,8 +94,6 @@
 #define CONFIG_DOS_PARTITION
 
 #define CONFIG_RBTREE
-#define CONFIG_LZO
-#define CONFIG_CMD_UBIFS	/* increases size by almost 60 KB */
 
 #define CONFIG_FEC_MXC
 #define CONFIG_MII
@@ -119,7 +117,7 @@
 
 /* We boot from the gfxRAM area of the OCRAM. */
 #define CONFIG_SYS_TEXT_BASE		0x3f408000
-#define CONFIG_BOARD_SIZE_LIMIT		524288
+#define CONFIG_BOARD_SIZE_LIMIT		491520
 
 #define MEM_LAYOUT_ENV_SETTINGS \
 	"fdt_addr_r=0x82000000\0" \
