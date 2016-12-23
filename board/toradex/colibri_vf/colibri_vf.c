@@ -27,6 +27,7 @@
 #include <asm/gpio.h>
 #include <usb.h>
 #include "../common/tdx-common.h"
+#include "../common/tdx-cfg-block.h"
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -588,6 +589,15 @@ int ft_board_setup(void *blob, bd_t *bd)
 	/* Update partition nodes using info from mtdparts env var */
 	puts("   Updating MTD partitions...\n");
 	fdt_fixup_mtdparts(blob, nodes, ARRAY_SIZE(nodes));
+#endif
+#ifdef CONFIG_TDX_CFG_BLOCK
+	/*
+	 * Colibri VFxx modules V1.2 and later have pull-up/down which allows
+	 * to put the DDR3 memory into self-refresh mode.
+	 */
+	if (tdx_hw_tag.ver_major > 1 || tdx_hw_tag.ver_minor >= 2)
+		do_fixup_by_compat(blob, "fsl,vf610-ddrmc",
+				"fsl,has-cke-reset-pulls", NULL, 0, 1);
 #endif
 #ifdef CONFIG_FSL_DCU_FB
 	ret = fsl_dcu_fixedfb_setup(blob);
