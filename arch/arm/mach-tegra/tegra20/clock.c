@@ -751,6 +751,7 @@ int tegra_plle_enable(void)
 }
 
 struct periph_clk_init periph_clk_init_table[] = {
+#ifndef CONFIG_TARGET_COLIBRI_T20
 	{ PERIPH_ID_SPI1, CLOCK_ID_PERIPH },
 	{ PERIPH_ID_SBC1, CLOCK_ID_PERIPH },
 	{ PERIPH_ID_SBC2, CLOCK_ID_PERIPH },
@@ -763,6 +764,7 @@ struct periph_clk_init periph_clk_init_table[] = {
 	{ PERIPH_ID_SDMMC2, CLOCK_ID_PERIPH },
 	{ PERIPH_ID_SDMMC3, CLOCK_ID_PERIPH },
 	{ PERIPH_ID_SDMMC4, CLOCK_ID_PERIPH },
+#endif /* CONFIG_TARGET_COLIBRI_T20 */
 	{ PERIPH_ID_PWM, CLOCK_ID_SFROM32KHZ },
 	{ PERIPH_ID_DVC_I2C, CLOCK_ID_PERIPH },
 	{ PERIPH_ID_I2C1, CLOCK_ID_PERIPH },
