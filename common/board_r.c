@@ -748,6 +748,14 @@ static int run_main_loop(void)
 	return 0;
 }
 
+#if defined (CONFIG_TARGET_COLIBRI_IMX6) || defined(CONFIG_TARGET_APALIS_IMX6)
+static int print_linefeed(void)
+{
+	printf("\n");
+	return 0;
+}
+#endif
+
 /*
  * Over time we hope to remove these functions with code fragments and
  * stub funtcions, and instead call the relevant function directly.
@@ -801,6 +809,10 @@ init_fnc_t init_sequence_r[] = {
 	efi_memory_init,
 #endif
 	stdio_init_tables,
+#if defined (CONFIG_TARGET_COLIBRI_IMX6) || defined(CONFIG_TARGET_APALIS_IMX6)
+	/* workaround delete line and garbage characters in output. */
+	print_linefeed,
+#endif
 	initr_serial,
 	initr_announce,
 	INIT_FUNC_WATCHDOG_RESET
