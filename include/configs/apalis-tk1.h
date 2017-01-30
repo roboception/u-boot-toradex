@@ -86,7 +86,7 @@
 		"${boot_file} && run fdt_fixup && " \
 		"bootm ${kernel_addr_r} - ${dtbparam}\0" \
 	"emmcdtbload=setenv dtbparam; ${mender_uboot_root} ${fdt_addr_r} " \
-		"${soc}-apalis-${fdt_board}.dtb && " \
+		"boot/${soc}-apalis-${fdt_board}.dtb && " \
 		"setenv dtbparam ${fdt_addr_r}\0"
 
 #define NFS_BOOTCMD \
@@ -122,7 +122,7 @@
 		"&& setenv dtbparam ${fdt_addr_r}\0"
 
 #define BOARD_EXTRA_ENV_SETTINGS \
-	"boot_file=uImage\0" \
+	"boot_file=boot/uImage\0" \
 	"console=ttyS0\0" \
 	"defargs=lp0_vec=2064@0xf46ff000 core_edp_mv=1150 core_edp_ma=4000 " \
 		"usb_port_owner_info=2 lane_owner_info=6 emc_max_dvfs=0\0" \
