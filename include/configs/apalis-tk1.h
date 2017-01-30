@@ -69,7 +69,7 @@
 #define CONFIG_SERVERIP		192.168.10.1
 
 #define CONFIG_BOOTCOMMAND \
-	"run mender_setup; run emmcboot; setenv fdtfile ${soc}-apalis-${fdt_board}.dtb && " \
+	"run mender_setup; run emmcboot; run mender_try_to_recover; setenv fdtfile ${soc}-apalis-${fdt_board}.dtb && " \
 		"run distro_bootcmd"
 
 #define DFU_ALT_EMMC_INFO	"apalis-tk1.img raw 0x0 0x500 mmcpart 1; " \
