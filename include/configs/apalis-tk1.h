@@ -33,8 +33,9 @@
 #define CONFIG_GENERIC_MMC
 #define CONFIG_SUPPORT_EMMC_BOOT	/* eMMC specific */
 
-/* Mender support */
+/* Mender support: enable bootcount limit and store it in u-boot environment */
 #define CONFIG_BOOTCOUNT_LIMIT
+#define CONFIG_BOOTCOUNT_ENV
 
 /* Environment in eMMC, before config block at the end of 1st "boot sector" */
 #define CONFIG_ENV_IS_IN_MMC
