@@ -33,16 +33,15 @@
 #define CONFIG_GENERIC_MMC
 #define CONFIG_SUPPORT_EMMC_BOOT	/* eMMC specific */
 
-/* Mender support: enable bootcount limit and store it in u-boot environment */
+/* Mender support: enable bootcount limit and store it in u-boot environment as big endian */
 #define CONFIG_BOOTCOUNT_LIMIT
 #define CONFIG_BOOTCOUNT_ENV
+#define CONFIG_SYS_BOOTCOUNT_BE
 
 /* Environment in eMMC, before config block at the end of 1st "boot sector" */
 #define CONFIG_ENV_IS_IN_MMC
 #define CONFIG_ENV_OFFSET		(-CONFIG_ENV_SIZE + \
 					 CONFIG_TDX_CFG_BLOCK_OFFSET)
-#define CONFIG_SYS_MMC_ENV_DEV		0
-#define CONFIG_SYS_MMC_ENV_PART		1
 
 /* USB host support */
 #define CONFIG_USB_EHCI
