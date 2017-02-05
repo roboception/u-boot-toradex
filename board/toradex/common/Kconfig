@@ -67,3 +67,11 @@ config TDX_CFG_BLOCK_2ND_ETHADDR
 	  second Ethernet address as environment variable (eth1addr).
 
 endif
+
+config IMX_GETSPLVER
+	bool "Enable get spl version command"
+	depends on SPL && (TARGET_COLIBRI_IMX6 || TARGET_APALIS_IMX6)
+	default y
+	help
+	  Add a command to parse the SPL version from its mass storage location
+	  which can compare the found version against a given string.
