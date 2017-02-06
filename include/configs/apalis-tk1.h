@@ -36,7 +36,6 @@
 /* Mender support: enable bootcount limit and store it in u-boot environment as big endian */
 #define CONFIG_BOOTCOUNT_LIMIT
 #define CONFIG_BOOTCOUNT_ENV
-#define CONFIG_SYS_BOOTCOUNT_BE
 
 /* Environment in eMMC, before config block at the end of 1st "boot sector" */
 #define CONFIG_ENV_IS_IN_MMC
