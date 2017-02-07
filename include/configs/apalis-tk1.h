@@ -66,7 +66,7 @@
 #define CONFIG_SERVERIP		192.168.10.1
 
 #define CONFIG_BOOTCOMMAND \
-	"run mender_setup; run emmcboot; run mender_try_to_recover; setenv fdtfile ${soc}-apalis-${fdt_board}.dtb && " \
+	"run emmcboot; run mender_try_to_recover; setenv fdtfile ${soc}-apalis-${fdt_board}.dtb && " \
 		"run distro_bootcmd"
 
 #define DFU_ALT_EMMC_INFO	"apalis-tk1.img raw 0x0 0x500 mmcpart 1; " \
@@ -78,7 +78,7 @@
 #define EMMC_BOOTCMD \
 	"emmcargs=ip=off root=${mender_kernel_root} rw rootfstype=ext3 rootwait\0" \
 	"emmcboot=run setup; setenv bootargs ${defargs} ${emmcargs} " \
-		"${setupargs} ${vidargs}; echo Booting from internal eMMC " \
+		"${setupargs} ${vidargs}; run mender_setup; echo Booting from internal eMMC " \
 		"chip...; run emmcdtbload; load ${mender_uboot_root} ${kernel_addr_r} " \
 		"${boot_file} && run fdt_fixup && " \
 		"bootm ${kernel_addr_r} - ${dtbparam}\0" \
