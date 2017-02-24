@@ -39,6 +39,7 @@
 
 /* Environment in eMMC, before config block at the end of 1st "boot sector" */
 #define CONFIG_ENV_IS_IN_MMC
+#define CONFIG_ENV_SIZE_REDUND CONFIG_ENV_SIZE
 
 /* USB host support */
 #define CONFIG_USB_EHCI
