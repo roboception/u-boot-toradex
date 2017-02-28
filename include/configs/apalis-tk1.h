@@ -67,7 +67,7 @@
 #define CONFIG_SERVERIP		192.168.10.1
 
 #define CONFIG_BOOTCOMMAND \
-	"run emmcboot; run mender_try_to_recover; setenv fdtfile ${soc}-apalis-${fdt_board}.dtb && " \
+	"run ethupdate; run emmcboot; setenv fdtfile ${soc}-apalis-${fdt_board}.dtb && " \
 		"run distro_bootcmd"
 
 #define DFU_ALT_EMMC_INFO	"apalis-tk1.img raw 0x0 0x500 mmcpart 1; " \
@@ -130,6 +130,11 @@
 	"fdt_fixup=;\0" \
 	NFS_BOOTCMD \
 	SD_BOOTCMD \
+	"checketh=if env exists ethaddr; then; else setenv " \
+		"ethaddr 00:14:2d:00:00:00; fi; pci enum; if ping ${serverip}; then " \
+		"setenv host_alive 1; else setenv host_alive 0; fi;\0" \
+	"ethupdate=run checketh; if test ${host_alive} = 1; then run setethupdate; " \
+		"run update; else echo no update over eth; fi; setenv host_alive;\0" \
 	"setethupdate=if env exists ethaddr; then; else setenv ethaddr " \
 		"00:14:2d:00:00:00; fi; pci enum && tftpboot ${loadaddr} " \
 		"flash_eth.img && source ${loadaddr}\0" \
