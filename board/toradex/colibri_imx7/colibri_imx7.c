@@ -18,9 +18,11 @@
 #include <dm/platform_data/serial_mxc.h>
 #include <fdt_support.h>
 #include <fsl_esdhc.h>
+#include <jffs2/load_kernel.h>
 #include <linux/sizes.h>
 #include <mmc.h>
 #include <miiphy.h>
+#include <mtd_node.h>
 #include <netdev.h>
 #include <power/pmic.h>
 #include <power/rn5t567_pmic.h>
@@ -431,12 +433,19 @@ ulong board_get_usable_ram_top(ulong total_size)
 #if defined(CONFIG_OF_LIBFDT) && defined(CONFIG_OF_BOARD_SETUP)
 int ft_board_setup(void *blob, bd_t *bd)
 {
-#if defined(CONFIG_IMX_BOOTAUX)
-	int up;
+	int ret = 0;
+#if defined(CONFIG_FDT_FIXUP_PARTITIONS)
+	static struct node_info nodes[] = {
+		{ "fsl,imx7d-gpmi-nand", MTD_DEV_TYPE_NAND, }, /* NAND flash */
+	};
 
-	up = arch_auxiliary_core_check_up(0);
-	if (up) {
-		int ret;
+	/* Update partition nodes using info from mtdparts env var */
+	puts("   Updating MTD partitions...\n");
+	fdt_fixup_mtdparts(blob, nodes, ARRAY_SIZE(nodes));
+#endif
+#if defined(CONFIG_IMX_BOOTAUX)
+	ret = arch_auxiliary_core_check_up(0);
+	if (ret) {
 		int areas = 1;
 		u64 start[2], size[2];
 
