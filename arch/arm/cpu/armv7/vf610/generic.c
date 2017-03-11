@@ -371,3 +371,45 @@ void enable_caches(void)
 	mmu_set_region_dcache_behaviour(IRAM_BASE_ADDR, IRAM_SIZE, option);
 }
 #endif
+
+#ifdef CONFIG_IMX_BOOTAUX
+#define CCM_CCOWR_START 0x00015a5a
+
+const struct memorymap hostmap[] = {
+	{ .auxcore = 0x00000000, .host = 0x00000000, .size = 0x18000 },
+	{ .auxcore = 0x1f000000, .host = 0x3f000000, .size = 0x80000 },
+	{ .auxcore = 0x1f800000, .host = 0x1f800000, .size = 0x8000 },
+	{ .auxcore = 0x3f000000, .host = 0x3f000000, .size = 0x80000 },
+	{ .auxcore = 0x3f800000, .host = 0x3f800000, .size = 0x8000 },
+	{ .auxcore = 0x00800000, .host = 0x80800000, .size = 0x0f800000 },
+	{ .auxcore = 0x80000000, .host = 0x80000000, .size = 0xe0000000 },
+	{ /* sentinel */ }
+};
+
+/* The Cortex-M4 starts from the address present in SRC_GPR2 */
+int arch_auxiliary_core_up(u32 core_id, u32 stack, u32 pc)
+{
+	struct src *src = (struct src *)SRC_BASE_ADDR;
+	struct ccm_reg *ccm = (struct ccm_reg *)CCM_BASE_ADDR;
+
+	/* Set the PC for the Cortex-M4 */
+	writel(pc, &src->gpr2);
+
+	/* Enable M4 */
+	writel(CCM_CCOWR_START, &ccm->ccowr);
+
+	return 0;
+}
+
+int arch_auxiliary_core_check_up(u32 core_id)
+{
+	uint32_t val;
+	struct ccm_reg *ccm = (struct ccm_reg *)CCM_BASE_ADDR;
+
+	val = readl(&ccm->ccowr);
+	if (val & 0x00010000)
+		return 1;
+
+	return 0;
+}
+#endif
