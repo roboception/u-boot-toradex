@@ -308,16 +308,19 @@ void imx_get_mac_from_fuse(int dev_id, unsigned char *mac)
 #endif
 
 #ifdef CONFIG_IMX_BOOTAUX
-int arch_auxiliary_core_up(u32 core_id, u32 boot_private_data)
+
+/*
+ * Per the cortex-M reference manual, the reset vector of M4 needs
+ * to exist at 0x0 (TCMUL). The PC and SP are the first two addresses
+ * of that vector.  So to boot M4, the A core must build the M4's reset
+ * vector with getting the PC and SP from image and filling them to
+ * TCMUL. When M4 is kicked, it will load the PC and SP by itself.
+ * The TCMUL is mapped to (M4_BOOTROM_BASE_ADDR) at A core side for
+ * accessing the M4 TCMUL.
+ */
+int arch_auxiliary_core_up(u32 core_id, u32 stack, u32 pc)
 {
-	u32 stack, pc;
 	struct src *src_reg = (struct src *)SRC_BASE_ADDR;
-
-	if (!boot_private_data)
-		return 1;
-
-	stack = *(u32 *)boot_private_data;
-	pc = *(u32 *)(boot_private_data + 4);
 
 	/* Set the stack and pc to M4 bootROM */
 	writel(stack, M4_BOOTROM_BASE_ADDR);

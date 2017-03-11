@@ -8,13 +8,13 @@
 #include <command.h>
 
 /* Allow for arch specific config before we boot */
-static int __arch_auxiliary_core_up(u32 core_id, u32 boot_private_data)
+static int __arch_auxiliary_core_up(u32 core_id, u32 stack, u32 pc)
 {
 	/* please define platform specific arch_auxiliary_core_up() */
 	return CMD_RET_FAILURE;
 }
 
-int arch_auxiliary_core_up(u32 core_id, u32 boot_private_data)
+int arch_auxiliary_core_up(u32 core_id, u32 stack, u32 pc)
 	__attribute__((weak, alias("__arch_auxiliary_core_up")));
 
 /* Allow for arch specific config before we boot */
@@ -31,17 +31,10 @@ int arch_auxiliary_core_check_up(u32 core_id)
  * To i.MX6SX and i.MX7D, the image supported by bootaux needs
  * the reset vector at the head for the image, with SP and PC
  * as the first two words.
- *
- * Per the cortex-M reference manual, the reset vector of M4 needs
- * to exist at 0x0 (TCMUL). The PC and SP are the first two addresses
- * of that vector.  So to boot M4, the A core must build the M4's reset
- * vector with getting the PC and SP from image and filling them to
- * TCMUL. When M4 is kicked, it will load the PC and SP by itself.
- * The TCMUL is mapped to (M4_BOOTROM_BASE_ADDR) at A core side for
- * accessing the M4 TCMUL.
  */
 int do_bootaux(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
+	u32 stack, pc;
 	ulong addr;
 	int ret, up;
 
@@ -56,9 +49,13 @@ int do_bootaux(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 	addr = simple_strtoul(argv[1], NULL, 16);
 
-	printf("## Starting auxiliary core at 0x%08lX ...\n", addr);
+	/* Assume binary file with vector table at the beginning */
+	stack = *(u32 *)addr;
+	pc = *(u32 *)(addr + 4);
 
-	ret = arch_auxiliary_core_up(0, addr);
+	printf("## Starting auxiliary core at 0x%08X ...\n", pc);
+
+	ret = arch_auxiliary_core_up(0, stack, pc);
 	if (ret)
 		return CMD_RET_FAILURE;
 
