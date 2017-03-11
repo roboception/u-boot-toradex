@@ -645,6 +645,18 @@ void imx_setup_hdmi(void)
 #endif
 
 #ifdef CONFIG_IMX_BOOTAUX
+#ifdef CONFIG_MX6SX
+const struct memorymap hostmap[] = {
+	{ .auxcore = 0x00000000, .host = 0x007f8000, .size = 0x8000 },
+	{ .auxcore = 0x1fff8000, .host = 0x007f8000, .size = 0x8000 },
+	{ .auxcore = 0x20000000, .host = 0x00800000, .size = 0x8000 },
+	{ .auxcore = 0x00900000, .host = 0x00900000, .size = 0x20000 },
+	{ .auxcore = 0x20900000, .host = 0x00900000, .size = 0x20000 },
+	{ .auxcore = 0x10000000, .host = 0x80000000, .size = 0x0fff0000 },
+	{ .auxcore = 0x80000000, .host = 0x80000000, .size = 0xe0000000 },
+	{ /* sentinel */ }
+#endif
+
 /*
  * Per the cortex-M reference manual, the reset vector of M4 needs
  * to exist at 0x0 (TCMUL). The PC and SP are the first two addresses

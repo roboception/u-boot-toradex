@@ -308,6 +308,21 @@ void imx_get_mac_from_fuse(int dev_id, unsigned char *mac)
 #endif
 
 #ifdef CONFIG_IMX_BOOTAUX
+const struct memorymap hostmap[] = {
+	{ .auxcore = 0x00000000, .host = 0x00180000, .size = 0x8000 },
+	{ .auxcore = 0x00180000, .host = 0x00180000, .size = 0x8000 },
+	{ .auxcore = 0x1fff8000, .host = 0x007f8000, .size = 0x8000 },
+	{ .auxcore = 0x20000000, .host = 0x00800000, .size = 0x8000 },
+	{ .auxcore = 0x00900000, .host = 0x00900000, .size = 0x20000 },
+	{ .auxcore = 0x20200000, .host = 0x00900000, .size = 0x20000 },
+	{ .auxcore = 0x00920000, .host = 0x00920000, .size = 0x20000 },
+	{ .auxcore = 0x20220000, .host = 0x00920000, .size = 0x20000 },
+	{ .auxcore = 0x00940000, .host = 0x00940000, .size = 0x20000 },
+	{ .auxcore = 0x20240000, .host = 0x00940000, .size = 0x20000 },
+	{ .auxcore = 0x10000000, .host = 0x80000000, .size = 0x0fff0000 },
+	{ .auxcore = 0x80000000, .host = 0x80000000, .size = 0xe0000000 },
+	{ /* sentinel */ }
+};
 
 /*
  * Per the cortex-M reference manual, the reset vector of M4 needs

@@ -37,6 +37,12 @@
 #define is_mx6ul() (is_cpu_type(MXC_CPU_MX6UL))
 #define is_mx6ull() (is_cpu_type(MXC_CPU_MX6ULL))
 
+struct memorymap {
+	unsigned long auxcore;
+	unsigned long host;
+	unsigned long size;
+};
+
 u32 get_nr_cpus(void);
 u32 get_cpu_rev(void);
 u32 get_cpu_speed_grade_hz(void);
