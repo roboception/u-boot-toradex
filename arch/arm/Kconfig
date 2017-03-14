@@ -583,20 +583,8 @@ config TARGET_TS4800
 	bool "Support TS4800"
 	select CPU_V7
 
-config TARGET_VF610TWR
-	bool "Support vf610twr"
-	select CPU_V7
-
-config TARGET_COLIBRI_VF
-	bool "Support Colibri VF50/61"
-	select CPU_V7
-
-config TARGET_PCM052
-	bool "Support pcm-052"
-	select CPU_V7
-
-config TARGET_BK4R1
-	bool "Support BK4r1"
+config ARCH_VF610
+	bool "Freescale Vybrid"
 	select CPU_V7
 
 config ARCH_ZYNQ
@@ -925,6 +913,8 @@ source "arch/arm/mach-tegra/Kconfig"
 
 source "arch/arm/mach-uniphier/Kconfig"
 
+source "arch/arm/cpu/armv7/vf610/Kconfig"
+
 source "arch/arm/mach-zynq/Kconfig"
 
 source "arch/arm/cpu/armv7/Kconfig"
@@ -988,7 +978,6 @@ source "board/imx31_phycore/Kconfig"
 source "board/isee/igep0033/Kconfig"
 source "board/mpl/vcma9/Kconfig"
 source "board/olimex/mx23_olinuxino/Kconfig"
-source "board/phytec/pcm051/Kconfig"
 source "board/phytec/pcm052/Kconfig"
 source "board/ppcag/bg0900/Kconfig"
 source "board/samsung/smdk2410/Kconfig"
@@ -1014,7 +1003,6 @@ source "board/ti/ti814x/Kconfig"
 source "board/ti/ti816x/Kconfig"
 source "board/timll/devkit3250/Kconfig"
 source "board/toradex/colibri_pxa270/Kconfig"
-source "board/toradex/colibri_vf/Kconfig"
 source "board/technologic/ts4800/Kconfig"
 source "board/vscom/baltos/Kconfig"
 source "board/woodburn/Kconfig"
