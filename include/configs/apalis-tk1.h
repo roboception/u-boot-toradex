@@ -78,8 +78,8 @@
 
 #define EMMC_BOOTCMD \
 	"emmcargs=ip=off root=${mender_kernel_root} rw rootfstype=ext3 rootwait\0" \
-	"emmcboot=run setup; setenv bootargs ${defargs} ${emmcargs} ${setupargs} " \
-	  "${vidargs}; run fdt_fix\0" \
+	"emmcboot=setenv bootargs ${defargs} ${emmcargs} ${setupargs} " \
+	  "${vidargs}; run fdt_fixup && bootm ${kernel_addr_r} - ${dtbparam}\0" \
 	"emmcdtbload=setenv dtbparam; load ${mender_uboot_root} ${fdt_addr_r} " \
 		"boot/${soc}-apalis-${fdt_board}.dtb && " \
 		"setenv dtbparam ${fdt_addr_r}\0"
@@ -127,9 +127,9 @@
 	"fdt_fixup=;\0" \
 	NFS_BOOTCMD \
 	SD_BOOTCMD \
-	"bootseq=run mender_setup; run chkbootable; if test ${linuxbootable} = 1;" \
+	"bootseq=run setup; run mender_setup; run chkbootable; if test ${linuxbootable} = 1;" \
 	  "then run emmcboot; else run switchpart; run chkbootable; if test "\
-		"${linuxbootable} = 1; then run boot; else run setethupdate; fi; fi;\0" \
+		"${linuxbootable} = 1; then run emmcboot; else run setethupdate; fi; fi;\0" \
 	"chkbootable=run chkdtb; run chkkernel; if test ${dtbloaded} = 1 && test " \
 	  "${kernelloaded} = 1;then setenv linuxbootable 1; else setenv " \
 		"linuxbootable 0; echo Linux not bootable from ${mender_uboot_root}; " \
