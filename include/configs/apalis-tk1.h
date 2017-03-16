@@ -127,17 +127,17 @@
 	"fdt_fixup=;\0" \
 	NFS_BOOTCMD \
 	SD_BOOTCMD \
-	"bootseq=run mender_setup; run chkbootable; if test '${linuxbootable}' = 1;" \
+	"bootseq=run mender_setup; run chkbootable; if test ${linuxbootable} = 1;" \
 	  "then run emmcboot; else run switchpart; run chkbootable; if test "\
-		"'${linuxbootable}' = 1; then run boot; else run setethupdate; fi; fi;\0" \
-	"chkbootable=run chkdtb; run chkkernel; if test '${dtbloaded}' = 1 && test " \
-	  "'${kernelloaded}' = 1;then setenv linuxbootable 1; else setenv " \
-		"linuxbootable 0; echo Linux not bootable from '${mender_uboot_root}'; " \
+		"${linuxbootable} = 1; then run boot; else run setethupdate; fi; fi;\0" \
+	"chkbootable=run chkdtb; run chkkernel; if test ${dtbloaded} = 1 && test " \
+	  "${kernelloaded} = 1;then setenv linuxbootable 1; else setenv " \
+		"linuxbootable 0; echo Linux not bootable from ${mender_uboot_root}; " \
 		"fi;\0" \
-	"chkdtb=if load '${mender_uboot_root}' '${fdt_addr_r}' " \
+	"chkdtb=if load ${mender_uboot_root} ${fdt_addr_r} " \
 		"boot/${soc}-apalis-${fdt_board}.dtb; then setenv dtbloaded 1; " \
 		"else setenv dtbloaded 0; fi;\0" \
-	"chkkernel=if load '${mender_uboot_root}' '${kernel_addr_r}' ${boot_file}; " \
+	"chkkernel=if load ${mender_uboot_root} ${kernel_addr_r} ${boot_file}; " \
 		"then setenv kernelloaded 1; else setenv kernelloaded 0; fi;\0" \
 	"checketh=if env exists ethaddr; then; else setenv " \
 		"ethaddr 00:14:2d:00:00:00; fi; pci enum; if ping ${serverip}; then " \
@@ -160,7 +160,7 @@
 	"setusbupdate=usb start && setenv interface usb; setenv drive 0; " \
 		"load ${interface} ${drive}:1 ${loadaddr} flash_blk.img && " \
 		"source ${loadaddr}\0" \
-	"switchpart=if test '${mender_boot_part}' = 2; then setenv " \
+	"switchpart=if test ${mender_boot_part} = 2; then setenv " \
 		"mender_boot_part 3; else setenv mender_boot_part 2; fi; " \
 	  "run mender_setup;\0" \
 	USB_BOOTCMD \
