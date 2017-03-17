@@ -67,8 +67,7 @@
 #define CONFIG_SERVERIP		192.168.10.1
 
 #define CONFIG_BOOTCOMMAND \
-	"run bootseq; setenv fdtfile ${soc}-apalis-${fdt_board}.dtb && " \
-		"run distro_bootcmd"
+	"run bootseq"
 
 #define DFU_ALT_EMMC_INFO	"apalis-tk1.img raw 0x0 0x500 mmcpart 1; " \
 				"boot part 0 1 mmcpart 0; " \
@@ -127,9 +126,10 @@
 	"fdt_fixup=;\0" \
 	NFS_BOOTCMD \
 	SD_BOOTCMD \
-	"bootseq=run setup; run mender_setup; run chkbootable; if test ${linuxbootable} = 1;" \
-	  "then run emmcboot; else run switchpart; run chkbootable; if test "\
-		"${linuxbootable} = 1; then run emmcboot; else run setethupdate; fi; fi;\0" \
+	"bootseq=run setup; run setup_mender; run chkbootable; if test " \
+	  "${linuxbootable} = 1;then run emmcboot; else run switchpart; run setup; " \
+		"run setup_mender; run chkbootable; if test ${linuxbootable} = 1; " \
+		"then run emmcboot; else run setethupdate; fi; fi;\0" \
 	"chkbootable=run chkdtb; run chkkernel; if test ${dtbloaded} = 1 && test " \
 	  "${kernelloaded} = 1;then setenv linuxbootable 1; else setenv " \
 		"linuxbootable 0; echo Linux not bootable from ${mender_uboot_root}; " \
