@@ -77,11 +77,13 @@
 
 #define EMMC_BOOTCMD \
 	"emmcargs=ip=off root=${mender_kernel_root} rw rootfstype=ext3 rootwait\0" \
-	"emmcboot=setenv bootargs ${defargs} ${emmcargs} ${setupargs} " \
-	  "${vidargs}; run fdt_fixup && bootm ${kernel_addr_r} - ${dtbparam}\0" \
+	"emmcboot=setenv bootargs ${defargs} ${emmcargs} ${setupargs} ${vidargs}; " \
+	  "run expand_bootargs; bootm ${kernel_addr_r} - ${fdt_addr_r}\0" \
 	"emmcdtbload=setenv dtbparam; load ${mender_uboot_root} ${fdt_addr_r} " \
 		"boot/${soc}-apalis-${fdt_board}.dtb && " \
 		"setenv dtbparam ${fdt_addr_r}\0"
+	"expand_bootargs=setenv expand setenv emmcargs ${emmcargs};run expand; " \
+	  "setenv expand setenv bootargs ${bootargs}; run expand; setenv expand;\0" \
 
 #define NFS_BOOTCMD \
 	"nfsargs=ip=:::::eth0:on root=/dev/nfs rw\0" \
@@ -157,12 +159,14 @@
 		"console=${console},${baudrate}n8 debug_uartport=lsport,0 " \
 		"${memargs}\0" \
 	"setupdate=run setsdupdate || run setusbupdate || run setethupdate\0" \
+	"setup_mender=setenv mender_kernel_root /dev/mmcblk0p${mender_boot_part}; " \
+	  "setenv mender_uboot_root mmc 0:${mender_boot_part};\0" \
 	"setusbupdate=usb start && setenv interface usb; setenv drive 0; " \
 		"load ${interface} ${drive}:1 ${loadaddr} flash_blk.img && " \
 		"source ${loadaddr}\0" \
-	"switchpart=if test ${mender_boot_part} = 2; then setenv " \
-		"mender_boot_part 3; else setenv mender_boot_part 2; fi; " \
-	  "run mender_setup;\0" \
+	"switchpart=if test ${mender_boot_part} = 2; then setenv mender_boot_part 3; " \
+	  "echo Switching to partition B; else setenv mender_boot_part 2; echo " \
+		"Switching to partition A; fi; run setup_mender;\0" \
 	USB_BOOTCMD \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 
