@@ -505,6 +505,10 @@ void putc(const char c)
 
 void puts(const char *s)
 {
+#if (defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_DISABLE_CONSOLE))
+	return;
+#else
+
 #ifdef CONFIG_SANDBOX
 	if (!gd || !(gd->flags & GD_FLG_SERIAL_READY)) {
 		os_puts(s);
@@ -546,6 +550,7 @@ void puts(const char *s)
 		pre_console_puts(s);
 		serial_puts(s);
 	}
+#endif
 }
 
 #ifdef CONFIG_CONSOLE_RECORD

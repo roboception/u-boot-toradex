@@ -246,6 +246,13 @@ config SILENT_CONSOLE_UPDATE_ON_RELOC
 	  (e.g. NAND). This option makes the value of the 'silent'
 	  environment variable take effect at relocation.
 
+config SPL_DISABLE_CONSOLE
+	bool "Support a disabled console in SPL"
+	default y if SILENT_CONSOLE
+	help
+	  This option disables the console, meaning that no
+	  output will appear on the console devices.
+
 config PRE_CONSOLE_BUFFER
 	bool "Buffer characters before the console is available"
 	help
