@@ -75,3 +75,12 @@ config IMX_GETSPLVER
 	help
 	  Add a command to parse the SPL version from its mass storage location
 	  which can compare the found version against a given string.
+
+config SPL_SILENT_CONSOLE
+	bool "Support a silent console in SPL"
+	depends on SPL && (TARGET_COLIBRI_IMX6 || TARGET_APALIS_IMX6)
+	default y if SILENT_CONSOLE
+	help
+	  This option will silence all messages printed to the console during
+	  normal program flow on Apalis/Colibri iMX6. Error messages or
+	  warnings are not affected.

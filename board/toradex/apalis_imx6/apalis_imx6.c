@@ -1235,13 +1235,17 @@ static void spl_dram_init(void)
 	switch (get_cpu_temp_grade(&minc, &maxc)) {
 	case TEMP_COMMERCIAL:
 	case TEMP_EXTCOMMERCIAL:
+#ifndef CONFIG_SPL_SILENT_CONSOLE
 		puts("Commercial temperature grade DDR3 timings.\n");
+#endif
 		ddr_init(mx6_com_dcd_table, ARRAY_SIZE(mx6_com_dcd_table));
 		break;
 	case TEMP_INDUSTRIAL:
 	case TEMP_AUTOMOTIVE:
 	default:
+#ifndef CONFIG_SPL_SILENT_CONSOLE
 		puts("Industrial temperature grade DDR3 timings.\n");
+#endif
 		ddr_init(mx6_it_dcd_table, ARRAY_SIZE(mx6_it_dcd_table));
 		break;
 	};
