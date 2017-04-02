@@ -295,7 +295,10 @@ static int mxc_serial_probe(struct udevice *dev)
 	writel(0, &uart->cr1);
 	writel(0, &uart->cr2);
 	while (!(readl(&uart->cr2) & UCR2_SRST));
-	writel(0x704 | UCR3_ADNIMP, &uart->cr3);
+	if (plat->use_dte)
+		writel(0x404 | UCR3_ADNIMP, &uart->cr3);
+	else
+		writel(0x704 | UCR3_ADNIMP, &uart->cr3);
 	writel(0x8000, &uart->cr4);
 	writel(0x2b, &uart->esc);
 	writel(0, &uart->tim);
