@@ -67,8 +67,7 @@
 #define CONFIG_SERVERIP		192.168.10.1
 
 #define CONFIG_BOOTCOMMAND \
-	"run emmcboot; setenv fdtfile ${soc}-apalis-${fdt_board}.dtb && " \
-		"run distro_bootcmd"
+	"run bootseq"
 
 #define DFU_ALT_EMMC_INFO	"apalis-tk1.img raw 0x0 0x500 mmcpart 1; " \
 				"boot part 0 1 mmcpart 0; " \
@@ -78,14 +77,13 @@
 
 #define EMMC_BOOTCMD \
 	"emmcargs=ip=off root=${mender_kernel_root} rw rootfstype=ext3 rootwait\0" \
-	"emmcboot=run setup; setenv bootargs ${defargs} ${emmcargs} " \
-		"${setupargs} ${vidargs}; run mender_setup; echo Booting from internal eMMC " \
-		"chip...; run emmcdtbload; load ${mender_uboot_root} ${kernel_addr_r} " \
-		"${boot_file} && run fdt_fixup && " \
-		"bootm ${kernel_addr_r} - ${dtbparam}\0" \
+	"emmcboot=setenv bootargs ${defargs} ${emmcargs} ${setupargs} ${vidargs}; " \
+	  "run expand_bootargs; bootm ${kernel_addr_r} - ${fdt_addr_r}\0" \
 	"emmcdtbload=setenv dtbparam; load ${mender_uboot_root} ${fdt_addr_r} " \
 		"boot/${soc}-apalis-${fdt_board}.dtb && " \
-		"setenv dtbparam ${fdt_addr_r}\0"
+		"setenv dtbparam ${fdt_addr_r}\0" \
+	"expand_bootargs=setenv expand setenv emmcargs ${emmcargs};run expand; " \
+	  "setenv expand setenv bootargs ${bootargs}; run expand; setenv expand;\0"
 
 #define NFS_BOOTCMD \
 	"nfsargs=ip=:::::eth0:on root=/dev/nfs rw\0" \
@@ -130,6 +128,19 @@
 	"fdt_fixup=;\0" \
 	NFS_BOOTCMD \
 	SD_BOOTCMD \
+	"bootseq=run setup; run setup_mender; run chkbootable; if test " \
+	  "${linuxbootable} = 1;then run emmcboot; else run switchpart; run " \
+		"chkbootable; if test '${linuxbootable}' = 1; then run boot; else run " \
+		"setethupdate; fi; fi;\0" \
+	"chkbootable=run chkdtb; run chkkernel; if test ${dtbloaded} = 1 && test " \
+	  "${kernelloaded} = 1;then setenv linuxbootable 1; else setenv " \
+		"linuxbootable 0; echo Linux not bootable from ${mender_uboot_root}; " \
+		"fi;\0" \
+	"chkdtb=if load ${mender_uboot_root} ${fdt_addr_r} " \
+		"boot/${soc}-apalis-${fdt_board}.dtb; then setenv dtbloaded 1; " \
+		"else setenv dtbloaded 0; fi;\0" \
+	"chkkernel=if load ${mender_uboot_root} ${kernel_addr_r} ${boot_file}; " \
+		"then setenv kernelloaded 1; else setenv kernelloaded 0; fi;\0" \
 	"checketh=if env exists ethaddr; then; else setenv " \
 		"ethaddr 00:14:2d:00:00:00; fi; pci enum; if ping ${serverip}; then " \
 		"setenv host_alive 1; else setenv host_alive 0; fi;\0" \
@@ -148,9 +159,14 @@
 		"console=${console},${baudrate}n8 debug_uartport=lsport,0 " \
 		"${memargs}\0" \
 	"setupdate=run setsdupdate || run setusbupdate || run setethupdate\0" \
+	"setup_mender=setenv mender_kernel_root /dev/mmcblk0p${mender_boot_part}; " \
+	  "setenv mender_uboot_root mmc 0:${mender_boot_part};\0" \
 	"setusbupdate=usb start && setenv interface usb; setenv drive 0; " \
 		"load ${interface} ${drive}:1 ${loadaddr} flash_blk.img && " \
 		"source ${loadaddr}\0" \
+	"switchpart=if test ${mender_boot_part} = 2; then setenv mender_boot_part 3; " \
+	  "echo Switching to partition B; else setenv mender_boot_part 2; echo " \
+		"Switching to partition A; fi; run setup_mender;\0" \
 	USB_BOOTCMD \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 
