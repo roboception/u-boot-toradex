@@ -81,9 +81,9 @@
 	  "run expand_bootargs; bootm ${kernel_addr_r} - ${fdt_addr_r}\0" \
 	"emmcdtbload=setenv dtbparam; load ${mender_uboot_root} ${fdt_addr_r} " \
 		"boot/${soc}-apalis-${fdt_board}.dtb && " \
-		"setenv dtbparam ${fdt_addr_r}\0"
+		"setenv dtbparam ${fdt_addr_r}\0" \
 	"expand_bootargs=setenv expand setenv emmcargs ${emmcargs};run expand; " \
-	  "setenv expand setenv bootargs ${bootargs}; run expand; setenv expand;\0" \
+	  "setenv expand setenv bootargs ${bootargs}; run expand; setenv expand;\0"
 
 #define NFS_BOOTCMD \
 	"nfsargs=ip=:::::eth0:on root=/dev/nfs rw\0" \
