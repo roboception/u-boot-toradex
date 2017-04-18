@@ -130,7 +130,7 @@
 	SD_BOOTCMD \
 	"bootseq=run setup; run setup_mender; run chkbootable; if test " \
 	  "${linuxbootable} = 1;then run emmcboot; else run switchpart; run " \
-		"chkbootable; if test ${linuxbootable} = 1; then run boot; else run " \
+		"chkbootable; if test ${linuxbootable} = 1; then run emmcboot; else run " \
 		"setethupdate; fi; fi;\0" \
 	"chkbootable=run chkdtb; run chkkernel; if test ${dtbloaded} = 1 && test " \
 	  "${kernelloaded} = 1;then setenv linuxbootable 1; else setenv " \
