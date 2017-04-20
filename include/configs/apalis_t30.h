@@ -16,6 +16,7 @@
 #define CONFIG_ARCH_MISC_INIT
 
 /* VDD core PMIC */
+#define CONFIG_TEGRA_VDD_CORE_TPS62362_SET0
 #define CONFIG_TEGRA_VDD_CORE_TPS62362_SET_TPS65911_GPIO1
 
 /* High-level configuration options */
