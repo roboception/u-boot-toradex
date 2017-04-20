@@ -85,38 +85,6 @@
 	"expand_bootargs=setenv expand setenv emmcargs ${emmcargs};run expand; " \
 	  "setenv expand setenv bootargs ${bootargs}; run expand; setenv expand;\0"
 
-#define NFS_BOOTCMD \
-	"nfsargs=ip=:::::eth0:on root=/dev/nfs rw\0" \
-	"nfsboot=pci enum; run setup; setenv bootargs ${defargs} ${nfsargs} " \
-		"${setupargs} ${vidargs}; echo Booting via DHCP/TFTP/NFS...; " \
-		"run nfsdtbload; dhcp ${kernel_addr_r} " \
-		"&& run fdt_fixup && bootm ${kernel_addr_r} - ${dtbparam}\0" \
-	"nfsdtbload=setenv dtbparam; tftp ${fdt_addr_r} " \
-		"${soc}-apalis-${fdt_board}.dtb " \
-		"&& setenv dtbparam ${fdt_addr_r}\0"
-
-#define SD_BOOTCMD \
-	"sdargs=ip=off root=/dev/mmcblk1p2 rw rootfstype=ext3 rootwait\0" \
-	"sdboot=run setup; setenv bootargs ${defargs} ${sdargs} ${setupargs} " \
-		"${vidargs}; echo Booting from SD card in 8bit slot...; " \
-		"run sddtbload; load mmc 1:1 ${kernel_addr_r} " \
-		"${boot_file} && run fdt_fixup && " \
-		"bootm ${kernel_addr_r} - ${dtbparam}\0" \
-	"sddtbload=setenv dtbparam; load mmc 1:1 ${fdt_addr_r} " \
-		"${soc}-apalis-${fdt_board}.dtb " \
-		"&& setenv dtbparam ${fdt_addr_r}\0"
-
-#define USB_BOOTCMD \
-	"usbargs=ip=off root=/dev/sda2 rw rootfstype=ext3 rootwait\0" \
-	"usbboot=run setup; setenv bootargs ${defargs} ${setupargs} " \
-		"${usbargs} ${vidargs}; echo Booting from USB stick...; " \
-		"usb start && run usbdtbload; load usb 0:1 ${kernel_addr_r} " \
-		"${boot_file} && run fdt_fixup && " \
-		"bootm ${kernel_addr_r} - ${dtbparam}\0" \
-	"usbdtbload=setenv dtbparam; load usb 0:1 ${fdt_addr_r} " \
-		"${soc}-apalis-${fdt_board}.dtb " \
-		"&& setenv dtbparam ${fdt_addr_r}\0"
-
 #define BOARD_EXTRA_ENV_SETTINGS \
 	"boot_file=boot/uImage\0" \
 	"console=ttyS0\0" \
@@ -126,8 +94,6 @@
 	EMMC_BOOTCMD \
 	"fdt_board=eval\0" \
 	"fdt_fixup=;\0" \
-	NFS_BOOTCMD \
-	SD_BOOTCMD \
 	"bootseq=run setup; run setup_mender; run chkbootable; if test " \
 	  "${linuxbootable} = 1;then run emmcboot; else run switchpart; run " \
 		"chkbootable; if test ${linuxbootable} = 1; then run emmcboot; else run " \
@@ -141,11 +107,6 @@
 		"else setenv dtbloaded 0; fi;\0" \
 	"chkkernel=if load ${mender_uboot_root} ${kernel_addr_r} ${boot_file}; " \
 		"then setenv kernelloaded 1; else setenv kernelloaded 0; fi;\0" \
-	"checketh=if env exists ethaddr; then; else setenv " \
-		"ethaddr 00:14:2d:00:00:00; fi; pci enum; if ping ${serverip}; then " \
-		"setenv host_alive 1; else setenv host_alive 0; fi;\0" \
-	"ethupdate=run checketh; if test ${host_alive} = 1; then run setethupdate; " \
-		"run update; else echo no update over eth; fi; setenv host_alive;\0" \
 	"setethupdate=if env exists ethaddr; then; else setenv ethaddr " \
 		"00:14:2d:00:00:00; fi; pci enum && tftpboot ${loadaddr} " \
 		"flash_eth.img && source ${loadaddr}\0" \
@@ -158,16 +119,11 @@
 		"consoleblank=0 no_console_suspend=1 console=tty1 " \
 		"console=${console},${baudrate}n8 debug_uartport=lsport,0 " \
 		"${memargs}\0" \
-	"setupdate=run setsdupdate || run setusbupdate || run setethupdate\0" \
 	"setup_mender=setenv mender_kernel_root /dev/mmcblk0p${mender_boot_part}; " \
 	  "setenv mender_uboot_root mmc 0:${mender_boot_part};\0" \
-	"setusbupdate=usb start && setenv interface usb; setenv drive 0; " \
-		"load ${interface} ${drive}:1 ${loadaddr} flash_blk.img && " \
-		"source ${loadaddr}\0" \
 	"switchpart=if test ${mender_boot_part} = 2; then setenv mender_boot_part 3; " \
 	  "echo Switching to partition B; else setenv mender_boot_part 2; echo " \
 		"Switching to partition A; fi; run setup_mender;\0" \
-	USB_BOOTCMD \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 
 /* Increase console I/O buffer size */
