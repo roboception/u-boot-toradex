@@ -336,6 +336,14 @@ int board_late_init(void)
 	add_board_boot_modes(board_boot_modes);
 #endif
 
+#ifdef CONFIG_CMD_USB_SDP
+	if (get_boot_device() == USB_SDP_BOOT) {
+		printf("Serial Downloader recovery mode, using sdp command\n");
+		setenv("bootdelay", "0");
+		setenv("bootcmd", "sdp 0");
+	}
+#endif
+
 	return 0;
 }
 
