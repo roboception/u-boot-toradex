@@ -94,8 +94,8 @@
 	EMMC_BOOTCMD \
 	"fdt_board=eval\0" \
 	"fdt_fixup=;\0" \
-	"bootseq=run setup; run setup_mender; run chkbootable; if test " \
-	  "${linuxbootable} = 1;then run emmcboot; else run switchpart; run " \
+	"bootseq=run setup; run setup_mender; run pinupdate; run chkbootable; if " \
+	  "test ${linuxbootable} = 1; then run emmcboot; else run switchpart; run " \
 		"chkbootable; if test ${linuxbootable} = 1; then run emmcboot; else run " \
 		"setethupdate; fi; fi;\0" \
 	"chkbootable=run chkdtb; run chkkernel; if test ${dtbloaded} = 1 && test " \
@@ -107,6 +107,12 @@
 		"else setenv dtbloaded 0; fi;\0" \
 	"chkkernel=if load ${mender_uboot_root} ${kernel_addr_r} ${boot_file}; " \
 		"then setenv kernelloaded 1; else setenv kernelloaded 0; fi;\0" \
+	"chkpin200=if gpio input A3; then echo 200 A3 low && false; else " \
+		"echo 200 A3 high && true; fi;\0" \
+  "chkpin204=if gpio input A2; then echo 204 A2 low && false; else " \
+		"echo 204 A2 high && true; fi;\0" \
+  "pinupdate=if run chkpin200 && run chkpin204 ; then echo update && run " \
+		"tftupdate; else echo no update; fi;\0" \
 	"setethupdate=if env exists ethaddr; then; else setenv ethaddr " \
 		"00:14:2d:00:00:00; fi; pci enum && tftpboot ${loadaddr} " \
 		"flash_eth.img && source ${loadaddr}\0" \
@@ -124,6 +130,8 @@
 	"switchpart=if test ${mender_boot_part} = 2; then setenv mender_boot_part 3; " \
 	  "echo Switching to partition B; else setenv mender_boot_part 2; echo " \
 		"Switching to partition A; fi; run setup_mender;\0" \
+	"tftupdate=setenv autoload false; if env exists ethaddr; then; else " \
+		"setenv ethaddr 00:14:2d:00:00:00; fi; pci enum; dhcp; echo fake update;\0" \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 
 /* Increase console I/O buffer size */
