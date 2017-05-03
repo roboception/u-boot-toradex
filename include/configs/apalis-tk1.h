@@ -131,7 +131,8 @@
 	  "echo Switching to partition B; else setenv mender_boot_part 2; echo " \
 		"Switching to partition A; fi; run setup_mender;\0" \
 	"tftupdate=setenv autoload false; if env exists ethaddr; then; else " \
-		"setenv ethaddr 00:14:2d:00:00:00; fi; pci enum; dhcp; echo fake update;\0" \
+		"setenv ethaddr 00:14:2d:00:00:00; fi; pci enum; dhcp; run setethupdate; " \
+		"run update;\0" \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 
 /* Increase console I/O buffer size */
