@@ -112,7 +112,7 @@
   "chkpin204=if gpio input A2; then echo 204 A2 low && false; else " \
 		"echo 204 A2 high && true; fi;\0" \
   "pinupdate=if run chkpin200 && run chkpin204 ; then echo update && run " \
-		"tftupdate; else echo no update; fi;\0" \
+		"tftpupdate; else echo no update; fi;\0" \
 	"setethupdate=if env exists ethaddr; then; else setenv ethaddr " \
 		"00:14:2d:00:00:00; fi; pci enum && tftpboot ${loadaddr} " \
 		"flash_eth.img && source ${loadaddr}\0" \
@@ -130,7 +130,7 @@
 	"switchpart=if test ${mender_boot_part} = 2; then setenv mender_boot_part 3; " \
 	  "echo Switching to partition B; else setenv mender_boot_part 2; echo " \
 		"Switching to partition A; fi; run setup_mender;\0" \
-	"tftupdate=setenv autoload false; if env exists ethaddr; then; else " \
+	"tftpupdate=setenv autoload false; if env exists ethaddr; then; else " \
 		"setenv ethaddr 00:14:2d:00:00:00; fi; pci enum; dhcp; run setethupdate; " \
 		"run update;\0" \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
