@@ -107,10 +107,10 @@
 		"else setenv dtbloaded 0; fi;\0" \
 	"chkkernel=if load ${mender_uboot_root} ${kernel_addr_r} ${boot_file}; " \
 		"then setenv kernelloaded 1; else setenv kernelloaded 0; fi;\0" \
-	"chkpin200=if gpio input A3; then echo 200 A3 low && false; else " \
-		"echo 200 A3 high && true; fi;\0" \
-  "chkpin204=if gpio input A2; then echo 204 A2 low && false; else " \
-		"echo 204 A2 high && true; fi;\0" \
+	"chkpin200=if gpio input A3; then echo 200 A3 low && true; else " \
+		"echo 200 A3 high && false; fi;\0" \
+  "chkpin204=if gpio input A2; then echo 204 A2 low && true; else " \
+		"echo 204 A2 high && false; fi;\0" \
   "pinupdate=if run chkpin200 && run chkpin204 ; then echo update && run " \
 		"tftpupdate; else echo no update; fi;\0" \
 	"setethupdate=if env exists ethaddr; then; else setenv ethaddr " \
