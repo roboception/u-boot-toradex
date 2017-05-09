@@ -74,8 +74,8 @@ static const struct pmux_pingrp_config apalis_tk1_pingrps[] = {
 	/*     pingrp,                 mux,          pull,   tri,      e_input, od,      rcv_sel */
 	PINCFG(CLK_32K_OUT_PA0,        SOC,          NORMAL, TRISTATE, INPUT,   DEFAULT, DEFAULT),
 	PINCFG(UART3_CTS_N_PA1,        GMI,          NORMAL, TRISTATE, INPUT,   DEFAULT, DEFAULT),
-	PINCFG(DAP2_FS_PA2,            HDA,          UP,     NORMAL,   INPUT,   DEFAULT, DEFAULT),
-	PINCFG(DAP2_SCLK_PA3,          HDA,          UP,     NORMAL,   INPUT,   DEFAULT, DEFAULT),
+	PINCFG(DAP2_FS_PA2,            HDA,          DOWN,   NORMAL,   INPUT,   DEFAULT, DEFAULT),
+	PINCFG(DAP2_SCLK_PA3,          HDA,          DOWN,   NORMAL,   INPUT,   DEFAULT, DEFAULT),
 	PINCFG(DAP2_DIN_PA4,           HDA,          NORMAL, TRISTATE, INPUT,   DEFAULT, DEFAULT),
 	PINCFG(DAP2_DOUT_PA5,          HDA,          NORMAL, NORMAL,   OUTPUT,  DEFAULT, DEFAULT),
 	PINCFG(SDMMC3_CLK_PA6,         SDMMC3,       NORMAL, NORMAL,   INPUT,   DEFAULT, DEFAULT),
