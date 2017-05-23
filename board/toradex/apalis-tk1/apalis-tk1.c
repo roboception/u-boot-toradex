@@ -11,14 +11,45 @@
 #include <asm/arch/gpio.h>
 #include <asm/arch/pinmux.h>
 #include <power/as3722.h>
+#include <i2c.h>
 
 #include "../common/tdx-common.h"
 #include "pinmux-config-apalis-tk1.h"
 
 #define LAN_RESET_N TEGRA_GPIO(S, 2)
 
+#define LEDCTRL_I2CBUS 0x1
+#define LEDCTRL_ADDR 0x32
+
 int arch_misc_init(void)
 {
+        printf("Initializing leds...\n");
+        // switch on red LED
+        unsigned int oldBus = i2c_get_bus_num();
+        i2c_set_bus_num(LEDCTRL_I2CBUS);
+
+        // enable led driver engine
+        i2c_reg_write(LEDCTRL_ADDR, 0x00, 0x40);
+
+        // configure pwm 
+        i2c_reg_write(LEDCTRL_ADDR, 0x36, 0x7E);
+  
+        // set current for red led
+        i2c_reg_write(LEDCTRL_ADDR, 0x2c, 0x03);
+
+        // enable output
+        i2c_reg_write(LEDCTRL_ADDR, 0x05, 0xff);
+
+        // set pwm for red led
+        i2c_reg_write(LEDCTRL_ADDR, 0x1c, 0xff);
+
+        // disable yellow and green led
+        i2c_reg_write(LEDCTRL_ADDR, 0x16, 0x00);
+        i2c_reg_write(LEDCTRL_ADDR, 0x17, 0x00);
+
+        // restore old bus configuration
+        i2c_set_bus_num(oldBus);
+
 	if (readl(NV_PA_BASE_SRAM + NVBOOTINFOTABLE_BOOTTYPE) ==
 	    NVBOOTTYPE_RECOVERY) {
 		printf("USB recovery mode, disabled autoboot\n");
