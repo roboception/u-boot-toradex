@@ -311,6 +311,7 @@ void imx_get_mac_from_fuse(int dev_id, unsigned char *mac)
 const struct memorymap hostmap[] = {
 	{ .auxcore = 0x00000000, .host = 0x00180000, .size = 0x8000 },
 	{ .auxcore = 0x00180000, .host = 0x00180000, .size = 0x8000 },
+	{ .auxcore = 0x20180000, .host = 0x00180000, .size = 0x8000 },
 	{ .auxcore = 0x1fff8000, .host = 0x007f8000, .size = 0x8000 },
 	{ .auxcore = 0x20000000, .host = 0x00800000, .size = 0x8000 },
 	{ .auxcore = 0x00900000, .host = 0x00900000, .size = 0x20000 },
