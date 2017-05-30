@@ -23,18 +23,27 @@
 
 int arch_misc_init(void)
 {
+   // engine firmare for led blinking
+  unsigned char fwEng1[] = {0x9d,0x01,0x40,0xFF,0x60,0x00,0x40,0x00,0x60,0x00,0x00,0x00};
+  unsigned char fwEng2[] = {0x9d,0x02,0x40,0xFF,0x60,0x00,0x40,0x00,0x60,0x00,0x00,0x00};
+  unsigned char fwEng3[] = {0x9d,0x07,0x40,0xFF,0x60,0x00,0x40,0x00,0x60,0x00,0x00,0x00};
+  
         printf("Initializing leds...\n");
         // switch on red LED
         unsigned int oldBus = i2c_get_bus_num();
         i2c_set_bus_num(LEDCTRL_I2CBUS);
 
-        // enable led driver engine
-        i2c_reg_write(LEDCTRL_ADDR, 0x00, 0x40);
+        // enable led driver and programmable engines
+        i2c_reg_write(LEDCTRL_ADDR, 0x00, 0x6a);
 
         // configure pwm 
         i2c_reg_write(LEDCTRL_ADDR, 0x36, 0x7E);
-  
-        // set current for red led
+	
+        // set current for green led
+        i2c_reg_write(LEDCTRL_ADDR, 0x26, 0x02);
+        // set current for blue led
+        i2c_reg_write(LEDCTRL_ADDR, 0x27, 0x04);
+	// set current for red led
         i2c_reg_write(LEDCTRL_ADDR, 0x2c, 0x03);
 
         // enable output
@@ -47,9 +56,37 @@ int arch_misc_init(void)
         i2c_reg_write(LEDCTRL_ADDR, 0x16, 0x00);
         i2c_reg_write(LEDCTRL_ADDR, 0x17, 0x00);
 
+	// set programming mode for all engines
+	i2c_reg_write(LEDCTRL_ADDR, 0x01, 0x15);
+
+	// set pc for engine1 to memory page0
+	i2c_reg_write(LEDCTRL_ADDR, 0x37, 0x00);	
+	// select memory page0
+	i2c_reg_write(LEDCTRL_ADDR, 0x4f, 0x00);
+	// write firmware for engine1
+	i2c_write(LEDCTRL_ADDR, 0x50, 1, fwEng1, sizeof(fwEng1));
+	
+	// set pc for engine2 to memory page2
+	i2c_reg_write(LEDCTRL_ADDR, 0x38, 0x20);	
+	// select memory page2
+	i2c_reg_write(LEDCTRL_ADDR, 0x4f, 0x02);
+	// write firmware for engine2
+	i2c_write(LEDCTRL_ADDR, 0x50, 1, fwEng2, sizeof(fwEng2));
+
+	// set pc for engine3 to memory page4
+	i2c_reg_write(LEDCTRL_ADDR, 0x38, 0x40);	
+	// select memory page2
+	i2c_reg_write(LEDCTRL_ADDR, 0x4f, 0x04);	
+	// write firmware for engine3
+	i2c_write(LEDCTRL_ADDR, 0x50, 1, fwEng3, sizeof(fwEng3));
+	
+	// disable all engines
+	i2c_reg_write(LEDCTRL_ADDR, 0x01, 0x00);
+	
         // restore old bus configuration
         i2c_set_bus_num(oldBus);
 
+	
 	if (readl(NV_PA_BASE_SRAM + NVBOOTINFOTABLE_BOOTTYPE) ==
 	    NVBOOTTYPE_RECOVERY) {
 		printf("USB recovery mode, disabled autoboot\n");
