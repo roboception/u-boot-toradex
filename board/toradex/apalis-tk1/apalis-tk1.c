@@ -49,12 +49,10 @@ int arch_misc_init(void)
         // enable output
         i2c_reg_write(LEDCTRL_ADDR, 0x05, 0xff);
 
-        // set pwm for red led
+        // switch on all three leds (->white)
         i2c_reg_write(LEDCTRL_ADDR, 0x1c, 0xff);
-
-        // disable yellow and green led
-        i2c_reg_write(LEDCTRL_ADDR, 0x16, 0x00);
-        i2c_reg_write(LEDCTRL_ADDR, 0x17, 0x00);
+        i2c_reg_write(LEDCTRL_ADDR, 0x16, 0xff);
+        i2c_reg_write(LEDCTRL_ADDR, 0x17, 0xff);
 
 	// set programming mode for all engines
 	i2c_reg_write(LEDCTRL_ADDR, 0x01, 0x15);
