@@ -23,48 +23,53 @@
 
 int arch_misc_init(void)
 {
+  // mapping of leds is as follows:
+  // red   | D7
+  // blue  | D2
+  // green | D1
+
   // engine firmare for led blinking
-  unsigned char fwEng1[] = {0x9d,0x01,0x40,0xFF,0x60,0x00,0x40,0x00,0x60,0x00,0xA0,0x00};
-  unsigned char fwEng2[] = {0x9d,0x02,0x40,0xFF,0x60,0x00,0x40,0x00,0x60,0x00,0xA0,0x20};
-  unsigned char fwEng3[] = {0x9d,0x07,0x40,0xFF,0x60,0x00,0x40,0x00,0x60,0x00,0xA0,0x40};
+  unsigned char fwEng1[] = {0x9d,0x01,0x40,0xFF,0x60,0x00,0x40,0x00,0x60,0x00,0x00,0x00};
+  unsigned char fwEng2[] = {0x9d,0x02,0x40,0xFF,0x60,0x00,0x40,0x00,0x60,0x00,0x00,0x00};
+  unsigned char fwEng3[] = {0x9d,0x07,0x40,0xFF,0x60,0x00,0x40,0x00,0x60,0x00,0x00,0x00};
 
   printf("Initializing leds...\n");
-  // switch on red LED
+
   unsigned int oldBus = i2c_get_bus_num();
   i2c_set_bus_num(LEDCTRL_I2CBUS);
 
-  // enable led driver and programmable engines
+  // enable led driver and programmable engines [register: ENABLE ENGINE CNTRL1]
   i2c_reg_write(LEDCTRL_ADDR, 0x00, 0x6a);
 
-  // configure pwm
+  // configure pwm [register: MISC]
   i2c_reg_write(LEDCTRL_ADDR, 0x36, 0x7E);
 
-  // set current for green led
-  i2c_reg_write(LEDCTRL_ADDR, 0x26, 0x02);
-  // set current for blue led
-  i2c_reg_write(LEDCTRL_ADDR, 0x27, 0x04);
-  // set current for red led
+  // set currents for leds [registers: Current Control]
   i2c_reg_write(LEDCTRL_ADDR, 0x2c, 0x03);
+  i2c_reg_write(LEDCTRL_ADDR, 0x26, 0x02);
+  i2c_reg_write(LEDCTRL_ADDR, 0x27, 0x04);
 
-  // enable output
+  // enable output [register: OUTPUT ON/OFF CONTROL LSB]
   i2c_reg_write(LEDCTRL_ADDR, 0x05, 0xff);
 
-  // switch on all three leds (->white)
+  // switch on all three leds (->white) [registers: PWM]
   i2c_reg_write(LEDCTRL_ADDR, 0x1c, 0xff);
   i2c_reg_write(LEDCTRL_ADDR, 0x16, 0xff);
   i2c_reg_write(LEDCTRL_ADDR, 0x17, 0xff);
 
-  // set programming mode for all engines
+  // set programming mode for all engines [registers: ENGINE CNTRL2]
   i2c_reg_write(LEDCTRL_ADDR, 0x01, 0x15);
 
-  // set pc for engine1 to memory page0
+  // set pc for engine1 to memory page0 [registers: ENGINE1 PC, ENG1 PROG START ADDR]
+  i2c_reg_write(LEDCTRL_ADDR, 0x37, 0x00);
   i2c_reg_write(LEDCTRL_ADDR, 0x4c, 0x00);
-  // select memory page0
+  // select memory page0 [register: PROG MEM PAGE SEL]
   i2c_reg_write(LEDCTRL_ADDR, 0x4f, 0x00);
-  // write firmware for engine1
+  // write firmware for engine1 [register: PROGRAM MEMORY]
   i2c_write(LEDCTRL_ADDR, 0x50, 1, fwEng1, sizeof(fwEng1));
 
   // set pc for engine2 to memory page2
+  i2c_reg_write(LEDCTRL_ADDR, 0x38, 0x20);
   i2c_reg_write(LEDCTRL_ADDR, 0x4d, 0x20);
   // select memory page2
   i2c_reg_write(LEDCTRL_ADDR, 0x4f, 0x02);
@@ -72,12 +77,16 @@ int arch_misc_init(void)
   i2c_write(LEDCTRL_ADDR, 0x50, 1, fwEng2, sizeof(fwEng2));
 
   // set pc for engine3 to memory page4
+  i2c_reg_write(LEDCTRL_ADDR, 0x38, 0x40);
   i2c_reg_write(LEDCTRL_ADDR, 0x4e, 0x40);
   // select memory page2
   i2c_reg_write(LEDCTRL_ADDR, 0x4f, 0x04);
   // write firmware for engine3
   i2c_write(LEDCTRL_ADDR, 0x50, 1, fwEng3, sizeof(fwEng3));
 
+  // enable led driver and programmable engines
+  //i2c_reg_write(LEDCTRL_ADDR, 0x00, 0x6a);
+  
   // disable all engines
   i2c_reg_write(LEDCTRL_ADDR, 0x01, 0x00);
 
