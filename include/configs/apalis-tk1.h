@@ -130,10 +130,10 @@
 	"switchpart=if test ${mender_boot_part} = 2; then setenv mender_boot_part 3; " \
 	  "echo Switching to partition B; else setenv mender_boot_part 2; echo " \
 		"Switching to partition A; fi; run setup_mender;\0" \
-  "reload_defaults_and_boot=env default -a; saveenv; reset;\0" \
+  "reload_defaults=env default -a; saveenv;\0" \
 	"tftpupdate=setenv autoload false; if env exists ethaddr; then; else " \
 		"setenv ethaddr 00:14:2d:00:00:00; fi; pci enum; dhcp; run setethupdate; " \
-		"run update; setenv bootcmd run reload_defaults_and_boot; saveenv; reset\0" \
+		"run update; setenv bootcmd run reload_defaults; saveenv;\0" \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 
 /* Increase console I/O buffer size */
