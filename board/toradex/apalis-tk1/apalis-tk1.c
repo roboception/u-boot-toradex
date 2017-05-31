@@ -58,21 +58,21 @@ int arch_misc_init(void)
   i2c_reg_write(LEDCTRL_ADDR, 0x01, 0x15);
 
   // set pc for engine1 to memory page0
-  i2c_reg_write(LEDCTRL_ADDR, 0x37, 0x00);
+  i2c_reg_write(LEDCTRL_ADDR, 0x4c, 0x00);
   // select memory page0
   i2c_reg_write(LEDCTRL_ADDR, 0x4f, 0x00);
   // write firmware for engine1
   i2c_write(LEDCTRL_ADDR, 0x50, 1, fwEng1, sizeof(fwEng1));
 
   // set pc for engine2 to memory page2
-  i2c_reg_write(LEDCTRL_ADDR, 0x38, 0x20);
+  i2c_reg_write(LEDCTRL_ADDR, 0x4d, 0x20);
   // select memory page2
   i2c_reg_write(LEDCTRL_ADDR, 0x4f, 0x02);
   // write firmware for engine2
   i2c_write(LEDCTRL_ADDR, 0x50, 1, fwEng2, sizeof(fwEng2));
 
   // set pc for engine3 to memory page4
-  i2c_reg_write(LEDCTRL_ADDR, 0x38, 0x40);
+  i2c_reg_write(LEDCTRL_ADDR, 0x4e, 0x40);
   // select memory page2
   i2c_reg_write(LEDCTRL_ADDR, 0x4f, 0x04);
   // write firmware for engine3
