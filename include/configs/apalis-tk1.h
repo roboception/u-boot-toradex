@@ -137,6 +137,14 @@
 	"blink_green=i2c mw 0x32 0x01 20 1\0" \
 	"blink_blue=i2c mw 0x32 0x01 08 1\0" \
 	"blink_disable=i2c mw 0x32 0x01 00 1\0" \
+	"enable_white=run enable_red; run enable_green; run enable_blue;\0" \
+	"enable_red=i2c mw 0x32 1c ff\0" \
+	"enable_green=i2c mw 0x32 16 ff\0" \
+	"enable_blue=i2c mw 0x32 17 ff\0" \
+	"disable_white=run disable_red; run disable_green; run disable_blue;\0" \
+	"disable_red=i2c mw 0x32 1c 00\0" \
+	"disable_green=i2c mw 0x32 16 00\0" \
+	"disable_blue=i2c mw 0x32 17 00\0" \
 	"tftpconnect=setenv autoload false; if env exists ethaddr; then; else setenv " \
 		"ethaddr 00:14:2d:00:00:00; fi; pci enum;\0" \
 	"chkupdscr=if tftpboot ${loadaddr} flash_eth.img; then echo update script " \
