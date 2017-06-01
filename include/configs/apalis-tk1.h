@@ -152,10 +152,10 @@
 	"tftp_connect_state=run blink_init; run blink_white; run tftpconnect; until " \
 		"run chkupdscr; do echo try to reconnect && run tftpconnect; done; run " \
 		"blink_disable;\0" \
-	"tftpupdate=run blink_white; run tftp_connect_state; run disable_white; " \
-		"run setethupdate; run enable_blue; run blink_blue; run update; " \
-		"run blink_disable; run enable_white; run blink_white; setenv bootcmd " \
-		"run reload_defaults; saveenv;\0" \
+	"tftpupdate=run blink_white; run tftp_connect_state; " \
+		"run disable_white; run enable_blue; run blink_blue; run setethupdate && " \
+		"run update && run blink_disable && run enable_white && run blink_white && setenv bootcmd " \
+		"run reload_defaults && saveenv;\0" \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 
 /* Increase console I/O buffer size */
