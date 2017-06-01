@@ -145,7 +145,8 @@
 		"run chkupdscr; do echo try to reconnect && run tftpconnect; done; run " \
 		"blink_disable;\0" \
 	"tftpupdate=run blink_white; run tftp_connect_state; run blink_disable; " \
-		"run setethupdate; run update; setenv bootcmd run reload_defaults; saveenv;\0" \
+		"run setethupdate; run blink_blue; run update; run blink_disable; " \
+		"run blink_white; setenv bootcmd run reload_defaults; saveenv;\0" \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 
 /* Increase console I/O buffer size */
