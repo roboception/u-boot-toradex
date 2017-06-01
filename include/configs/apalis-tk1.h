@@ -131,9 +131,21 @@
 	  "echo Switching to partition B; else setenv mender_boot_part 2; echo " \
 		"Switching to partition A; fi; run setup_mender;\0" \
   "reload_defaults=env default -a; saveenv;\0" \
-	"tftpupdate=setenv autoload false; if env exists ethaddr; then; else " \
-		"setenv ethaddr 00:14:2d:00:00:00; fi; pci enum; dhcp; run setethupdate; " \
-		"run update; setenv bootcmd run reload_defaults; saveenv;\0" \
+	"blink_init=i2c dev 1\0" \
+	"blink_white=i2c mw 0x32 0x01 2a 1\0" \
+	"blink_red=i2c mw 0x32 0x01 02 1\0" \
+	"blink_green=i2c mw 0x32 0x01 20 1\0" \
+	"blink_blue=i2c mw 0x32 0x01 08 1\0" \
+	"blink_disable=i2c mw 0x32 0x01 00 1\0" \
+	"tftpconnect=setenv autoload false; if env exists ethaddr; then; else setenv " \
+		"ethaddr 00:14:2d:00:00:00; fi; pci enum; dhcp;\0" \
+	"chkupdscr=if tftpboot ${loadaddr} flash_eth.img; then echo update script " \
+		"accessible && true; else echo update script not accessible && false; fi;\0" \
+	"tftp_connect_state=run blink_init; run blink_white; run tftpconnect; until " \
+		"run chkupdscr; do echo try to reconnect && run tftpconnect; done; run " \
+		"blink_disable;\0" \
+	"tftpupdate=run blink_white; run tftp_connect_state; run blink_disable; " \
+		"run setethupdate; run update; setenv bootcmd run reload_defaults; saveenv;\0" \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 
 /* Increase console I/O buffer size */
