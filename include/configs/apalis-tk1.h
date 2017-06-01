@@ -138,7 +138,7 @@
 	"blink_blue=i2c mw 0x32 0x01 08 1\0" \
 	"blink_disable=i2c mw 0x32 0x01 00 1\0" \
 	"tftpconnect=setenv autoload false; if env exists ethaddr; then; else setenv " \
-		"ethaddr 00:14:2d:00:00:00; fi; pci enum; dhcp;\0" \
+		"ethaddr 00:14:2d:00:00:00; fi; pci enum;\0" \
 	"chkupdscr=if tftpboot ${loadaddr} flash_eth.img; then echo update script " \
 		"accessible && true; else echo update script not accessible && false; fi;\0" \
 	"tftp_connect_state=run blink_init; run blink_white; run tftpconnect; until " \
