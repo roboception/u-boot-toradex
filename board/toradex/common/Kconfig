@@ -66,6 +66,16 @@ config TDX_CFG_BLOCK_2ND_ETHADDR
 	  Ethernet carrier boards. This options enables the code to set the
 	  second Ethernet address as environment variable (eth1addr).
 
+config TDX_CFG_BLOCK_USB_GADGET_PID
+	bool "Use config block product ID as USB product ID"
+	depends on USB_GADGET_DOWNLOAD
+	default y
+	help
+	  Use the Toradex product ID learned from the config block as USB
+	  product ID. An offset of 0x4000 is added to the product ID since
+	  inside the Toradex vendor ID (0x1b67) the range starting from
+	  offset 0x4000 is reserved for Colibri/Apalis modules.
+
 endif
 
 config IMX_GETSPLVER
