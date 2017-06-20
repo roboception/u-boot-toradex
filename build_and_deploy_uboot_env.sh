@@ -13,6 +13,7 @@ UBOOT_BIN_OUT_DIR=$SCRIPTPATH/../rc_visard_image/apalis-tk1_bin
 
 cd ${UBOOT_DIR}
 ./tools/mkenvimage -r -s 0x20000 -o uboot-env.bin uboot-env.txt
+chmod 644 uboot-env.bin
 cp ${UBOOT_ENV_BIN} ${UBOOT_BIN_OUT_DIR}/${UBOOT_ENV_BIN}
 
 echo "${UBOOT_BIN_OUT_DIR}/${UBOOT_ENV_BIN}"
