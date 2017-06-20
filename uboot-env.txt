@@ -1,1 +1,6 @@
-blub=blub
+blink_blue=i2c mw 0x32 0x01 08 1
+blink_disable=i2c mw 0x32 0x01 00 1
+blink_green=i2c mw 0x32 0x01 20 1
+blink_init=i2c dev 1
+blink_red=i2c mw 0x32 0x01 02 1
+blink_white=i2c mw 0x32 0x01 2a 1
