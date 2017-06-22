@@ -24,7 +24,7 @@ cp ${env_obj_file_path} ${ENV_OBJ_FILE_COPY}
 
 # NOTE: objcopy saves its output to file passed in
 # (copy_env_common.o in this case)
-objcopy -O binary -j ".rodata.default_environment" ${ENV_OBJ_FILE_COPY}
+${CROSS_COMPILE}objcopy -O binary -j ".rodata.default_environment" ${ENV_OBJ_FILE_COPY}
 
 # Replace default '\0' with '\n' and sort entries
 tr '\0' '\n' < ${ENV_OBJ_FILE_COPY} | sort -u
