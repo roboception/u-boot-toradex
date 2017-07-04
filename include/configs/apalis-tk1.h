@@ -154,7 +154,7 @@
 		"blink_disable;\0" \
 	"tftpupdate=run blink_white; run tftp_connect_state; " \
 		"run disable_white; run enable_blue; run blink_blue; run setethupdate && " \
-		"run update && run blink_disable && run disable_blue && run enable_green && " \
+		"run update_followup && run blink_disable && run disable_blue && run enable_green && " \
 		"run blink_green && setenv bootcmd run reload_defaults && saveenv;\0" \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 
