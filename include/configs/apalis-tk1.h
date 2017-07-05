@@ -94,10 +94,10 @@
 	EMMC_BOOTCMD \
 	"fdt_board=eval\0" \
 	"fdt_fixup=;\0" \
-	"bootseq=run setup; run setup_mender; run pinupdate; run chkbootable; if " \
-	  "test ${linuxbootable} = 1; then run emmcboot; else run switchpart; run " \
-		"chkbootable; if test ${linuxbootable} = 1; then run emmcboot; else run " \
-		"setethupdate; fi; fi;\0" \
+	"bootseq=run setup; run mender_setup; run pinupdate; run chkbootable; " \
+	  "if test ${linuxbootable} = 1; then run emmcboot; else run mender_switchpart; " \
+	  "run mender_setup; run chkbootable; if test ${linuxbootable} = 1; then run emmcboot; " \
+	  "else run setethupdate; fi; fi;\0" \
 	"chkbootable=run chkdtb; run chkkernel; if test ${dtbloaded} = 1 && test " \
 	  "${kernelloaded} = 1;then setenv linuxbootable 1; else setenv " \
 		"linuxbootable 0; echo Linux not bootable from ${mender_uboot_root}; " \
@@ -109,9 +109,9 @@
 		"then setenv kernelloaded 1; else setenv kernelloaded 0; fi;\0" \
 	"chkpin200=if gpio input A3; then echo 200 A3 low && false; else " \
 		"echo 200 A3 high && true; fi;\0" \
-  "chkpin204=if gpio input A2; then echo 204 A2 low && false; else " \
+	"chkpin204=if gpio input A2; then echo 204 A2 low && false; else " \
 		"echo 204 A2 high && true; fi;\0" \
-  "pinupdate=if run chkpin200 && run chkpin204 ; then echo update && run " \
+	"pinupdate=if run chkpin200 && run chkpin204 ; then echo update && run " \
 		"tftpupdate; else echo no update; fi;\0" \
 	"setethupdate=if env exists ethaddr; then; else setenv ethaddr " \
 		"00:14:2d:00:00:00; fi; pci enum && tftpboot ${loadaddr} " \
@@ -125,11 +125,6 @@
 		"consoleblank=0 no_console_suspend=1 console=tty1 " \
 		"console=${console},${baudrate}n8 debug_uartport=lsport,0 " \
 		"${memargs}\0" \
-	"setup_mender=setenv mender_kernel_root /dev/mmcblk0p${mender_boot_part}; " \
-	  "setenv mender_uboot_root mmc 0:${mender_boot_part};\0" \
-	"switchpart=if test ${mender_boot_part} = 2; then setenv mender_boot_part 3; " \
-	  "echo Switching to partition B; else setenv mender_boot_part 2; echo " \
-		"Switching to partition A; fi; run setup_mender;\0" \
   "reload_defaults=env default -a; saveenv;\0" \
 	"blink_init=i2c dev 1\0" \
 	"blink_white=i2c mw 0x32 0x01 2a 1\0" \

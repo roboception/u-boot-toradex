@@ -27,7 +27,7 @@ boot_net_usb_start=usb start
 boot_prefixes=/ /boot/
 boot_script_dhcp=boot.scr.uimg
 boot_scripts=boot.scr.uimg boot.scr
-bootseq=run setup; run setup_mender; run pinupdate; run chkbootable; if test ${linuxbootable} = 1; then run emmcboot; else run switchpart; run chkbootable; if test ${linuxbootable} = 1; then run emmcboot; else run setethupdate; fi; fi;
+bootseq=run setup; run mender_setup; run pinupdate; run chkbootable; if test ${linuxbootable} = 1; then run emmcboot; else run mender_switchpart; run mender_setup; run chkbootable; if test ${linuxbootable} = 1; then run emmcboot; else run setethupdate; fi; fi;
 boot_targets=mmc1 mmc0 usb0 pxe dhcp 
 chkbootable=run chkdtb; run chkkernel; if test ${dtbloaded} = 1 && test ${kernelloaded} = 1;then setenv linuxbootable 1; else setenv linuxbootable 0; echo Linux not bootable from ${mender_uboot_root}; fi;
 chkdtb=if load ${mender_uboot_root} ${fdt_addr_r} boot/${soc}-apalis-${fdt_board}.dtb; then setenv dtbloaded 1; else setenv dtbloaded 0; fi;
@@ -60,9 +60,10 @@ initrd_high=ffffffff
 ipaddr=192.168.10.2
 kernel_addr_r=0x81000000
 loadaddr=0x81000000
-mender_altbootcmd=if test ${mender_boot_part} = 2; then setenv mender_boot_part 3; else setenv mender_boot_part 2; fi; setenv upgrade_available 0; saveenv; run mender_setup
+mender_altbootcmd=run mender_switchpart; run mender_setup
 mender_boot_part=2
-mender_setup=setenv mender_kernel_root /dev/mmcblk0p${mender_boot_part}; setenv mender_uboot_root mmc 0:${mender_boot_part}; setenv expand_bootargs setenv bootargs ${bootargs}; run expand_bootargs; setenv expand_bootargs
+mender_setup=setenv mender_kernel_root /dev/mmcblk0p${mender_boot_part}; setenv mender_uboot_root mmc 0:${mender_boot_part}
+mender_switchpart=if test ${mender_boot_part} = 2; then setenv mender_boot_part 3; else setenv mender_boot_part 2; fi; echo Switched to partition ${mender_boot_part}; setenv upgrade_available 0; saveenv
 mender_try_to_recover=if test ${upgrade_available} = 1; then reset; fi
 mender_uboot_boot=mmc 0:1
 mender_uboot_dev=0
@@ -81,13 +82,11 @@ scriptaddr=0x90000000
 serverip=192.168.10.1
 setethupdate=if env exists ethaddr; then; else setenv ethaddr 00:14:2d:00:00:00; fi; pci enum && tftpboot ${loadaddr} flash_eth.img && source ${loadaddr}
 setsdupdate=setenv interface mmc; setenv drive 1; mmc rescan; load ${interface} ${drive}:1 ${loadaddr} flash_blk.img || setenv drive 2; mmc rescan; load ${interface} ${drive}:1 ${loadaddr} flash_blk.img && source ${loadaddr}
-setup_mender=setenv mender_kernel_root /dev/mmcblk0p${mender_boot_part}; setenv mender_uboot_root mmc 0:${mender_boot_part};
 setup=setenv setupargs igb_mac=${ethaddr} consoleblank=0 no_console_suspend=1 console=tty1 console=${console},${baudrate}n8 debug_uartport=lsport,0 ${memargs}
 soc=tegra124
 stderr=serial
 stdin=serial
 stdout=serial
-switchpart=if test ${mender_boot_part} = 2; then setenv mender_boot_part 3; echo Switching to partition B; else setenv mender_boot_part 2; echo Switching to partition A; fi; run setup_mender;
 tftpconnect=setenv autoload false; if env exists ethaddr; then; else setenv ethaddr 00:14:2d:00:00:00; fi; pci enum;
 tftp_connect_state=run blink_init; run blink_white; run tftpconnect; until run chkupdscr; do echo try to reconnect && run tftpconnect; done; run blink_disable;
 tftpupdate=run blink_white; run tftp_connect_state; run disable_white; run enable_blue; run blink_blue; run setethupdate && run update_followup && run blink_disable && run disable_blue && run enable_green && run blink_green && setenv bootcmd run reload_defaults && saveenv;
