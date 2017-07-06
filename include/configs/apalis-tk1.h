@@ -67,7 +67,7 @@
 #define CONFIG_SERVERIP		192.168.10.1
 
 #define CONFIG_BOOTCOMMAND \
-	"run bootseq"
+	"run pinupdate; run emmcboot; run mender_switchpart; run emmcboot; run tftpupdate"
 
 #define DFU_ALT_EMMC_INFO	"apalis-tk1.img raw 0x0 0x500 mmcpart 1; " \
 				"boot part 0 1 mmcpart 0; " \
@@ -77,13 +77,46 @@
 
 #define EMMC_BOOTCMD \
 	"emmcargs=ip=off root=${mender_kernel_root} rw rootfstype=ext3 rootwait\0" \
-	"emmcboot=setenv bootargs ${defargs} ${emmcargs} ${setupargs} ${vidargs}; " \
-	  "run expand_bootargs; bootm ${kernel_addr_r} - ${fdt_addr_r}\0" \
+	"expand_emmcargs=setenv expand setenv emmcargs ${emmcargs}; run expand; setenv expand;\0" \
+	"emmcboot=run setup; run mender_setup; run expand_emmcargs; " \
+		"setenv bootargs ${defargs} ${emmcargs} ${setupargs} ${vidargs}; " \
+		"echo Trying to boot from internal eMMC partition ${mender_kernel_root}; " \
+		"run emmcdtbload && load ${mender_uboot_root} ${kernel_addr_r} ${boot_file} && " \
+		"run fdt_fixup && bootm ${kernel_addr_r} - ${dtbparam}\0" \
 	"emmcdtbload=setenv dtbparam; load ${mender_uboot_root} ${fdt_addr_r} " \
 		"boot/${soc}-apalis-${fdt_board}.dtb && " \
-		"setenv dtbparam ${fdt_addr_r}\0" \
-	"expand_bootargs=setenv expand setenv emmcargs ${emmcargs};run expand; " \
-	  "setenv expand setenv bootargs ${bootargs}; run expand; setenv expand;\0"
+		"setenv dtbparam ${fdt_addr_r}\0"
+#define NFS_BOOTCMD \
+	"nfsargs=ip=:::::eth0:on root=/dev/nfs rw\0" \
+	"nfsboot=pci enum; run setup; setenv bootargs ${defargs} ${nfsargs} " \
+		"${setupargs} ${vidargs}; echo Booting via DHCP/TFTP/NFS...; " \
+		"run nfsdtbload; dhcp ${kernel_addr_r} " \
+		"&& run fdt_fixup && bootm ${kernel_addr_r} - ${dtbparam}\0" \
+	"nfsdtbload=setenv dtbparam; tftp ${fdt_addr_r} " \
+		"${soc}-apalis-${fdt_board}.dtb " \
+		"&& setenv dtbparam ${fdt_addr_r}\0"
+
+#define SD_BOOTCMD \
+	"sdargs=ip=off root=/dev/mmcblk1p2 rw rootfstype=ext4 rootwait\0" \
+	"sdboot=run setup; setenv bootargs ${defargs} ${sdargs} ${setupargs} " \
+		"${vidargs}; echo Booting from SD card in 8bit slot...; " \
+		"run sddtbload; load mmc 1:1 ${kernel_addr_r} " \
+		"${boot_file} && run fdt_fixup && " \
+		"bootm ${kernel_addr_r} - ${dtbparam}\0" \
+	"sddtbload=setenv dtbparam; load mmc 1:1 ${fdt_addr_r} " \
+		"${soc}-apalis-${fdt_board}.dtb " \
+		"&& setenv dtbparam ${fdt_addr_r}\0"
+
+#define USB_BOOTCMD \
+	"usbargs=ip=off root=/dev/sda2 rw rootfstype=ext4 rootwait\0" \
+	"usbboot=run setup; setenv bootargs ${defargs} ${setupargs} " \
+		"${usbargs} ${vidargs}; echo Booting from USB stick...; " \
+		"usb start && run usbdtbload; load usb 0:1 ${kernel_addr_r} " \
+		"${boot_file} && run fdt_fixup && " \
+		"bootm ${kernel_addr_r} - ${dtbparam}\0" \
+	"usbdtbload=setenv dtbparam; load usb 0:1 ${fdt_addr_r} " \
+		"${soc}-apalis-${fdt_board}.dtb " \
+		"&& setenv dtbparam ${fdt_addr_r}\0"
 
 #define BOARD_EXTRA_ENV_SETTINGS \
 	"boot_file=boot/uImage\0" \
@@ -94,25 +127,8 @@
 	EMMC_BOOTCMD \
 	"fdt_board=eval\0" \
 	"fdt_fixup=;\0" \
-	"bootseq=run setup; run mender_setup; run pinupdate; run chkbootable; " \
-	  "if test ${linuxbootable} = 1; then run emmcboot; else run mender_switchpart; " \
-	  "run mender_setup; run chkbootable; if test ${linuxbootable} = 1; then run emmcboot; " \
-	  "else run setethupdate; fi; fi;\0" \
-	"chkbootable=run chkdtb; run chkkernel; if test ${dtbloaded} = 1 && test " \
-	  "${kernelloaded} = 1;then setenv linuxbootable 1; else setenv " \
-		"linuxbootable 0; echo Linux not bootable from ${mender_uboot_root}; " \
-		"fi;\0" \
-	"chkdtb=if load ${mender_uboot_root} ${fdt_addr_r} " \
-		"boot/${soc}-apalis-${fdt_board}.dtb; then setenv dtbloaded 1; " \
-		"else setenv dtbloaded 0; fi;\0" \
-	"chkkernel=if load ${mender_uboot_root} ${kernel_addr_r} ${boot_file}; " \
-		"then setenv kernelloaded 1; else setenv kernelloaded 0; fi;\0" \
-	"chkpin200=if gpio input A3; then echo 200 A3 low && false; else " \
-		"echo 200 A3 high && true; fi;\0" \
-	"chkpin204=if gpio input A2; then echo 204 A2 low && false; else " \
-		"echo 204 A2 high && true; fi;\0" \
-	"pinupdate=if run chkpin200 && run chkpin204 ; then echo update && run " \
-		"tftpupdate; else echo no update; fi;\0" \
+	NFS_BOOTCMD \
+	SD_BOOTCMD \
 	"setethupdate=if env exists ethaddr; then; else setenv ethaddr " \
 		"00:14:2d:00:00:00; fi; pci enum && tftpboot ${loadaddr} " \
 		"flash_eth.img && source ${loadaddr}\0" \
@@ -125,32 +141,39 @@
 		"consoleblank=0 no_console_suspend=1 console=tty1 " \
 		"console=${console},${baudrate}n8 debug_uartport=lsport,0 " \
 		"${memargs}\0" \
-  "reload_defaults=env default -a; saveenv;\0" \
+	"chkpin200=if gpio input A3; then echo pin 200 (A3) is low && false; else " \
+		"echo pin 200 (A3) is high && true; fi;\0" \
+	"chkpin204=if gpio input A2; then echo pin 204 (A2) is low && false; else " \
+		"echo pin 204 (A2) is high && true; fi;\0" \
+	"pinupdate=if run chkpin200 && run chkpin204 ; then echo pinupdate: starting tftp update && " \
+		"run tftpupdate; else echo pinupdate: skipping tftp update; fi;\0" \
+	"reload_defaults=env default -a; saveenv; saveenv\0" \
 	"blink_init=i2c dev 1\0" \
 	"blink_white=i2c mw 0x32 0x01 2a 1\0" \
 	"blink_red=i2c mw 0x32 0x01 02 1\0" \
 	"blink_green=i2c mw 0x32 0x01 20 1\0" \
 	"blink_blue=i2c mw 0x32 0x01 08 1\0" \
 	"blink_disable=i2c mw 0x32 0x01 00 1\0" \
-	"enable_white=run enable_red; run enable_green; run enable_blue;\0" \
+	"enable_white=run enable_red; run enable_green; run enable_blue\0" \
 	"enable_red=i2c mw 0x32 1c ff\0" \
 	"enable_green=i2c mw 0x32 16 ff\0" \
 	"enable_blue=i2c mw 0x32 17 ff\0" \
-	"disable_white=run disable_red; run disable_green; run disable_blue;\0" \
+	"disable_white=run disable_red; run disable_green; run disable_blue\0" \
 	"disable_red=i2c mw 0x32 1c 00\0" \
 	"disable_green=i2c mw 0x32 16 00\0" \
 	"disable_blue=i2c mw 0x32 17 00\0" \
-	"tftpconnect=setenv autoload false; if env exists ethaddr; then; else setenv " \
+	"init_eth=setenv autoload false; if env exists ethaddr; then; else setenv " \
 		"ethaddr 00:14:2d:00:00:00; fi; pci enum;\0" \
 	"chkupdscr=if tftpboot ${loadaddr} flash_eth.img; then echo update script " \
 		"accessible && true; else echo update script not accessible && false; fi;\0" \
-	"tftp_connect_state=run blink_init; run blink_white; run tftpconnect; until " \
-		"run chkupdscr; do echo try to reconnect && run tftpconnect; done; run " \
-		"blink_disable;\0" \
-	"tftpupdate=run blink_white; run tftp_connect_state; " \
-		"run disable_white; run enable_blue; run blink_blue; run setethupdate && " \
-		"run update_followup && run blink_disable && run disable_blue && run enable_green && " \
-		"run blink_green && setenv bootcmd run reload_defaults && saveenv;\0" \
+	"tftp_connect_state=run init_eth; until run chkupdscr; " \
+		"do echo try to reconnect && run init_eth; done;\0" \
+	"tftpupdate=run blink_init; run blink_white; run tftp_connect_state; " \
+		"run blink_disable; run disable_white; run enable_blue; run blink_blue; " \
+		"run setethupdate && run update_followup && " \
+		"run blink_disable && run disable_blue && run enable_green && run blink_green && " \
+		"setenv bootcmd run reload_defaults && saveenv\0" \
+	USB_BOOTCMD \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 
 /* Increase console I/O buffer size */

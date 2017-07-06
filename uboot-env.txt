@@ -15,7 +15,7 @@ bootcmd_dhcp=run boot_net_usb_start; run boot_net_pci_enum; if dhcp ${scriptaddr
 bootcmd_mmc0=setenv devnum 0; run mmc_boot
 bootcmd_mmc1=setenv devnum 1; run mmc_boot
 bootcmd_pxe=run boot_net_usb_start; run boot_net_pci_enum; dhcp; if pxe get; then pxe boot; fi
-bootcmd=run bootseq
+bootcmd=run pinupdate; run emmcboot; run mender_switchpart; run emmcboot; run tftpupdate
 bootcmd_usb0=setenv devnum 0; run usb_boot
 bootcount=0
 bootdelay=1
@@ -27,13 +27,9 @@ boot_net_usb_start=usb start
 boot_prefixes=/ /boot/
 boot_script_dhcp=boot.scr.uimg
 boot_scripts=boot.scr.uimg boot.scr
-bootseq=run setup; run mender_setup; run pinupdate; run chkbootable; if test ${linuxbootable} = 1; then run emmcboot; else run mender_switchpart; run mender_setup; run chkbootable; if test ${linuxbootable} = 1; then run emmcboot; else run setethupdate; fi; fi;
 boot_targets=mmc1 mmc0 usb0 pxe dhcp 
-chkbootable=run chkdtb; run chkkernel; if test ${dtbloaded} = 1 && test ${kernelloaded} = 1;then setenv linuxbootable 1; else setenv linuxbootable 0; echo Linux not bootable from ${mender_uboot_root}; fi;
-chkdtb=if load ${mender_uboot_root} ${fdt_addr_r} boot/${soc}-apalis-${fdt_board}.dtb; then setenv dtbloaded 1; else setenv dtbloaded 0; fi;
-chkkernel=if load ${mender_uboot_root} ${kernel_addr_r} ${boot_file}; then setenv kernelloaded 1; else setenv kernelloaded 0; fi;
-chkpin200=if gpio input A3; then echo 200 A3 low && false; else echo 200 A3 high && true; fi;
-chkpin204=if gpio input A2; then echo 204 A2 low && false; else echo 204 A2 high && true; fi;
+chkpin200=if gpio input A3; then echo pin 200 (A3) is low && false; else echo pin 200 (A3) is high && true; fi;
+chkpin204=if gpio input A2; then echo pin 204 (A2) is low && false; else echo pin 204 (A2) is high && true; fi;
 chkupdscr=if tftpboot ${loadaddr} flash_eth.img; then echo update script accessible && true; else echo update script not accessible && false; fi;
 console=ttyS0
 cpu=armv7
@@ -42,43 +38,50 @@ dfu_alt_info=apalis-tk1.img raw 0x0 0x500 mmcpart 1; boot part 0 1 mmcpart 0; ro
 disable_blue=i2c mw 0x32 17 00
 disable_green=i2c mw 0x32 16 00
 disable_red=i2c mw 0x32 1c 00
-disable_white=run disable_red; run disable_green; run disable_blue;
+disable_white=run disable_red; run disable_green; run disable_blue
 distro_bootcmd=for target in ${boot_targets}; do run bootcmd_${target}; done
 emmcargs=ip=off root=${mender_kernel_root} rw rootfstype=ext3 rootwait
-emmcboot=setenv bootargs ${defargs} ${emmcargs} ${setupargs} ${vidargs}; run expand_bootargs; bootm ${kernel_addr_r} - ${fdt_addr_r}
+emmcboot=run setup; run mender_setup; run expand_emmcargs; setenv bootargs ${defargs} ${emmcargs} ${setupargs} ${vidargs}; echo Trying to boot from internal eMMC partition ${mender_kernel_root}; run emmcdtbload && load ${mender_uboot_root} ${kernel_addr_r} ${boot_file} && run fdt_fixup && bootm ${kernel_addr_r} - ${dtbparam}
 emmcdtbload=setenv dtbparam; load ${mender_uboot_root} ${fdt_addr_r} boot/${soc}-apalis-${fdt_board}.dtb && setenv dtbparam ${fdt_addr_r}
 enable_blue=i2c mw 0x32 17 ff
 enable_green=i2c mw 0x32 16 ff
 enable_red=i2c mw 0x32 1c ff
-enable_white=run enable_red; run enable_green; run enable_blue;
-expand_bootargs=setenv expand setenv emmcargs ${emmcargs};run expand; setenv expand setenv bootargs ${bootargs}; run expand; setenv expand;
+enable_white=run enable_red; run enable_green; run enable_blue
+expand_emmcargs=setenv expand setenv emmcargs ${emmcargs}; run expand; setenv expand;
 fdt_addr_r=0x82000000
 fdt_board=eval
 fdt_fixup=;
 fdt_high=ffffffff
+init_eth=setenv autoload false; if env exists ethaddr; then; else setenv ethaddr 00:14:2d:00:00:00; fi; pci enum;
 initrd_high=ffffffff
 ipaddr=192.168.10.2
 kernel_addr_r=0x81000000
 loadaddr=0x81000000
 mender_altbootcmd=run mender_switchpart; run mender_setup
 mender_boot_part=2
-mender_setup=setenv mender_kernel_root /dev/mmcblk0p${mender_boot_part}; setenv mender_uboot_root mmc 0:${mender_boot_part}
-mender_switchpart=if test ${mender_boot_part} = 2; then setenv mender_boot_part 3; else setenv mender_boot_part 2; fi; echo Switched to partition ${mender_boot_part}; setenv upgrade_available 0; saveenv
-mender_try_to_recover=if test ${upgrade_available} = 1; then reset; fi
+mender_setup=setenv mender_kernel_root /dev/mmcblk0p${mender_boot_part}; setenv mender_uboot_root mmc 0:${mender_boot_part}; setenv expand_bootargs setenv bootargs ${bootargs}; run expand_bootargs; setenv expand_bootargs
+mender_switchpart=if test ${mender_boot_part} = 2; then setenv mender_boot_part 3; else setenv mender_boot_part 2; fi; echo Switched to partition ${mender_boot_part}; setenv upgrade_available 0; saveenv; saveenv
+mender_try_to_recover=if test ${upgrade_available} = 1; then echo try to recover; reset; fi
 mender_uboot_boot=mmc 0:1
 mender_uboot_dev=0
 mender_uboot_if=mmc
 mmc_boot=if mmc dev ${devnum}; then setenv devtype mmc; run scan_dev_for_boot_part; fi
 netmask=255.255.255.0
-pinupdate=if run chkpin200 && run chkpin204 ; then echo update && run tftpupdate; else echo no update; fi;
+nfsargs=ip=:::::eth0:on root=/dev/nfs rw
+nfsboot=pci enum; run setup; setenv bootargs ${defargs} ${nfsargs} ${setupargs} ${vidargs}; echo Booting via DHCP/TFTP/NFS...; run nfsdtbload; dhcp ${kernel_addr_r} && run fdt_fixup && bootm ${kernel_addr_r} - ${dtbparam}
+nfsdtbload=setenv dtbparam; tftp ${fdt_addr_r} ${soc}-apalis-${fdt_board}.dtb && setenv dtbparam ${fdt_addr_r}
+pinupdate=if run chkpin200 && run chkpin204 ; then echo pinupdate: starting tftp update && run tftpupdate; else echo pinupdate: skipping tftp update; fi;
 pxefile_addr_r=0x90100000
 ramdisk_addr_r=0x82100000
-reload_defaults=env default -a; saveenv;
+reload_defaults=env default -a; saveenv; saveenv
 scan_dev_for_boot=echo Scanning ${devtype} ${devnum}:${distro_bootpart}...; for prefix in ${boot_prefixes}; do run scan_dev_for_extlinux; run scan_dev_for_scripts; done;
 scan_dev_for_boot_part=part list ${devtype} ${devnum} -bootable devplist; env exists devplist || setenv devplist 1; for distro_bootpart in ${devplist}; do if fstype ${devtype} ${devnum}:${distro_bootpart} bootfstype; then run scan_dev_for_boot; fi; done
 scan_dev_for_extlinux=if test -e ${devtype} ${devnum}:${distro_bootpart} ${prefix}extlinux/extlinux.conf; then echo Found ${prefix}extlinux/extlinux.conf; run boot_extlinux; echo SCRIPT FAILED: continuing...; fi
 scan_dev_for_scripts=for script in ${boot_scripts}; do if test -e ${devtype} ${devnum}:${distro_bootpart} ${prefix}${script}; then echo Found U-Boot script ${prefix}${script}; run boot_a_script; echo SCRIPT FAILED: continuing...; fi; done
 scriptaddr=0x90000000
+sdargs=ip=off root=/dev/mmcblk1p2 rw rootfstype=ext4 rootwait
+sdboot=run setup; setenv bootargs ${defargs} ${sdargs} ${setupargs} ${vidargs}; echo Booting from SD card in 8bit slot...; run sddtbload; load mmc 1:1 ${kernel_addr_r} ${boot_file} && run fdt_fixup && bootm ${kernel_addr_r} - ${dtbparam}
+sddtbload=setenv dtbparam; load mmc 1:1 ${fdt_addr_r} ${soc}-apalis-${fdt_board}.dtb && setenv dtbparam ${fdt_addr_r}
 serverip=192.168.10.1
 setethupdate=if env exists ethaddr; then; else setenv ethaddr 00:14:2d:00:00:00; fi; pci enum && tftpboot ${loadaddr} flash_eth.img && source ${loadaddr}
 setsdupdate=setenv interface mmc; setenv drive 1; mmc rescan; load ${interface} ${drive}:1 ${loadaddr} flash_blk.img || setenv drive 2; mmc rescan; load ${interface} ${drive}:1 ${loadaddr} flash_blk.img && source ${loadaddr}
@@ -87,10 +90,12 @@ soc=tegra124
 stderr=serial
 stdin=serial
 stdout=serial
-tftpconnect=setenv autoload false; if env exists ethaddr; then; else setenv ethaddr 00:14:2d:00:00:00; fi; pci enum;
-tftp_connect_state=run blink_init; run blink_white; run tftpconnect; until run chkupdscr; do echo try to reconnect && run tftpconnect; done; run blink_disable;
-tftpupdate=run blink_white; run tftp_connect_state; run disable_white; run enable_blue; run blink_blue; run setethupdate && run update_followup && run blink_disable && run disable_blue && run enable_green && run blink_green && setenv bootcmd run reload_defaults && saveenv;
+tftp_connect_state=run init_eth; until run chkupdscr; do echo try to reconnect && run init_eth; done;
+tftpupdate=run blink_init; run blink_white; run tftp_connect_state; run blink_disable; run disable_white; run enable_blue; run blink_blue; run setethupdate && run update_followup && run blink_disable && run disable_blue && run enable_green && run blink_green && setenv bootcmd run reload_defaults && saveenv
 upgrade_available=0
+usbargs=ip=off root=/dev/sda2 rw rootfstype=ext4 rootwait
+usbboot=run setup; setenv bootargs ${defargs} ${setupargs} ${usbargs} ${vidargs}; echo Booting from USB stick...; usb start && run usbdtbload; load usb 0:1 ${kernel_addr_r} ${boot_file} && run fdt_fixup && bootm ${kernel_addr_r} - ${dtbparam}
 usb_boot=usb start; if usb dev ${devnum}; then setenv devtype usb; run scan_dev_for_boot_part; fi
+usbdtbload=setenv dtbparam; load usb 0:1 ${fdt_addr_r} ${soc}-apalis-${fdt_board}.dtb && setenv dtbparam ${fdt_addr_r}
 vendor=toradex
 vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1

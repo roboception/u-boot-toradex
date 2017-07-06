@@ -45,7 +45,10 @@
                                                                         \
     "mender_setup="                                                     \
     "setenv mender_kernel_root " MENDER_STORAGE_DEVICE_BASE "${mender_boot_part}; " \
-    "setenv mender_uboot_root " MENDER_UBOOT_STORAGE_INTERFACE " " __stringify(MENDER_UBOOT_STORAGE_DEVICE) ":${mender_boot_part}\0" \
+    "setenv mender_uboot_root " MENDER_UBOOT_STORAGE_INTERFACE " " __stringify(MENDER_UBOOT_STORAGE_DEVICE) ":${mender_boot_part}; " \
+    "setenv expand_bootargs setenv bootargs ${bootargs}; "              \
+    "run expand_bootargs; "                                             \
+    "setenv expand_bootargs\0"                                          \
                                                                         \
     "mender_switchpart="                                                \
     "if test ${mender_boot_part} = " __stringify(MENDER_ROOTFS_PART_A_NUMBER) "; "  \
@@ -54,7 +57,7 @@
     "fi; "                                                              \
     "echo Switched to partition ${mender_boot_part}; "                  \
     "setenv upgrade_available 0; "                                      \
-    "saveenv\0"                                                         \
+    "saveenv; saveenv\0"                                                \
                                                                         \
     "mender_altbootcmd="                                                \
     "run mender_switchpart; "                                           \
@@ -62,7 +65,7 @@
                                                                         \
     "mender_try_to_recover="                                            \
     "if test ${upgrade_available} = 1; "                                \
-    "then reset; "                                                      \
+    "then echo try to recover; reset; "                                 \
     "fi\0"
 
 #endif /* HEADER_ENV_MENDER_H */

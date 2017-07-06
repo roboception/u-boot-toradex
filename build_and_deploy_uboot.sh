@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # build u-boot
 # copy u-boot into image binary directory
 
@@ -9,9 +9,32 @@ SCRIPTPATH=$(dirname "$SCRIPT")
 UBOOT_DIR=$SCRIPTPATH
 UBOOT_BIN=u-boot-dtb-tegra.bin
 UBOOT_CONFIG=apalis-tk1_defconfig
-UBOOT_BIN_OUT_DIR=$SCRIPTPATH/../rc_visard_image/apalis-tk1_bin
 UBOOT_BIN_RENAMED=u-boot-dtb-tegra-rc.bin
 UBOOT_ENV_BIN=uboot-env.bin
+# default output dir
+UBOOT_BIN_OUT_DIR=$SCRIPTPATH/../rc_visard_image/apalis-tk1_bin
+
+function usage() {
+  echo "Usage: build_and_deploy_uboot.sh [--output_dir /path/to/rc_visard_image/apalis-tk1_bin]"
+}
+
+args=1
+while [ $args == 1 ]
+do
+  case "$1" in
+    "--help" | "-h")
+      usage
+      exit 0
+      ;;
+    "--output_dir" | "-o")
+      UBOOT_BIN_OUT_DIR="$2"
+      shift
+      shift
+      ;;
+      *) # default
+        args=0
+  esac
+done
 
 if [ "$CROSS_COMPILE" == "" ]; then
   export CROSS_COMPILE=arm-linux-gnueabihf-
