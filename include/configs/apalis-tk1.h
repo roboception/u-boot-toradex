@@ -97,7 +97,7 @@
 		"&& setenv dtbparam ${fdt_addr_r}\0"
 
 #define SD_BOOTCMD \
-	"sdargs=ip=off root=/dev/mmcblk1p2 rw rootfstype=ext4 rootwait\0" \
+	"sdargs=ip=off root=/dev/mmcblk1p2 rw rootfstype=ext3 rootwait\0" \
 	"sdboot=run setup; setenv bootargs ${defargs} ${sdargs} ${setupargs} " \
 		"${vidargs}; echo Booting from SD card in 8bit slot...; " \
 		"run sddtbload; load mmc 1:1 ${kernel_addr_r} " \
@@ -108,7 +108,7 @@
 		"&& setenv dtbparam ${fdt_addr_r}\0"
 
 #define USB_BOOTCMD \
-	"usbargs=ip=off root=/dev/sda2 rw rootfstype=ext4 rootwait\0" \
+	"usbargs=ip=off root=/dev/sda2 rw rootfstype=ext3 rootwait\0" \
 	"usbboot=run setup; setenv bootargs ${defargs} ${setupargs} " \
 		"${usbargs} ${vidargs}; echo Booting from USB stick...; " \
 		"usb start && run usbdtbload; load usb 0:1 ${kernel_addr_r} " \
@@ -148,6 +148,7 @@
 	"pinupdate=if run chkpin200 && run chkpin204 ; then echo pinupdate: starting tftp update && " \
 		"run tftpupdate; else echo pinupdate: skipping tftp update; fi;\0" \
 	"reload_defaults=env default -a; saveenv; saveenv\0" \
+	"reload_on_reset=setenv bootcmd 'run reload_defaults; reset'; saveenv; saveenv\0" \
 	"blink_init=i2c dev 1\0" \
 	"blink_white=i2c mw 0x32 0x01 2a 1\0" \
 	"blink_red=i2c mw 0x32 0x01 02 1\0" \
@@ -172,7 +173,7 @@
 		"run blink_disable; run disable_white; run enable_blue; run blink_blue; " \
 		"run setethupdate && run update_followup && " \
 		"run blink_disable && run disable_blue && run enable_green && run blink_green && " \
-		"setenv bootcmd run reload_defaults && saveenv\0" \
+		"run reload_on_reset\0" \
 	USB_BOOTCMD \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 
