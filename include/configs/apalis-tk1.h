@@ -76,7 +76,7 @@
 				"tegra124-apalis-eval.dtb fat 0 1 mmcpart 0"
 
 #define EMMC_BOOTCMD \
-	"emmcargs=ip=off root=${mender_kernel_root} rw rootfstype=ext3 rootwait\0" \
+	"emmcargs=ip=off root=${mender_kernel_root} rw rootflags=nodelalloc rootwait\0" \
 	"expand_emmcargs=setenv expand setenv emmcargs ${emmcargs}; run expand; setenv expand;\0" \
 	"emmcboot=run setup; run mender_setup; run expand_emmcargs; " \
 		"setenv bootargs ${defargs} ${emmcargs} ${setupargs} ${vidargs}; " \
