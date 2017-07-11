@@ -67,7 +67,7 @@
 #define CONFIG_SERVERIP		192.168.10.1
 
 #define CONFIG_BOOTCOMMAND \
-	"run pinupdate; run emmcboot; run mender_switchpart; run emmcboot; run tftpupdate"
+	"run pinupdate && run forever; run emmcboot; run mender_switchpart; run emmcboot; run tftpupdate"
 
 #define DFU_ALT_EMMC_INFO	"apalis-tk1.img raw 0x0 0x500 mmcpart 1; " \
 				"boot part 0 1 mmcpart 0; " \
@@ -146,8 +146,9 @@
 	"chkpin204=if gpio input A2; then echo pin 204 (A2) is low && false; else " \
 		"echo pin 204 (A2) is high && true; fi;\0" \
 	"pinupdate=if run chkpin200 && run chkpin204 ; then echo pinupdate: starting tftp update && " \
-		"run tftpupdate; else echo pinupdate: skipping tftp update; fi;\0" \
+		"run tftpupdate && true; else echo pinupdate: skipping tftp update && false; fi;\0" \
 	"reload_defaults=env default -a; saveenv; saveenv\0" \
+	"forever=while true; do; done\0" \
 	"reload_on_reset=setenv bootcmd 'run reload_defaults; reset'; saveenv; saveenv\0" \
 	"blink_init=i2c dev 1\0" \
 	"blink_white=i2c mw 0x32 0x01 2a 1\0" \
