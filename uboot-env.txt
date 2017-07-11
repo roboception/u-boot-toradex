@@ -86,6 +86,7 @@ sdboot=run setup; setenv bootargs ${defargs} ${sdargs} ${setupargs} ${vidargs}; 
 sddtbload=setenv dtbparam; load mmc 1:1 ${fdt_addr_r} ${soc}-apalis-${fdt_board}.dtb && setenv dtbparam ${fdt_addr_r}
 serverip=192.168.10.1
 setethupdate=if env exists ethaddr; then; else setenv ethaddr 00:14:2d:00:00:00; fi; pci enum && tftpboot ${loadaddr} flash_eth.img && source ${loadaddr}
+set_out2_high=gpio set H1
 setsdupdate=setenv interface mmc; setenv drive 1; mmc rescan; load ${interface} ${drive}:1 ${loadaddr} flash_blk.img || setenv drive 2; mmc rescan; load ${interface} ${drive}:1 ${loadaddr} flash_blk.img && source ${loadaddr}
 setup=setenv setupargs igb_mac=${ethaddr} consoleblank=0 no_console_suspend=1 console=tty1 console=${console},${baudrate}n8 debug_uartport=lsport,0 ${memargs}
 soc=tegra124
@@ -93,7 +94,7 @@ stderr=serial
 stdin=serial
 stdout=serial
 tftp_connect_state=run init_eth; until run chkupdscr; do echo try to reconnect && run init_eth; done;
-tftpupdate=run blink_init; run blink_white; run tftp_connect_state; run blink_disable; run disable_white; run enable_blue; run blink_blue; run setethupdate && run update_followup && run blink_disable && run disable_blue && run enable_green && run blink_green && run reload_on_reset
+tftpupdate=run blink_init; run blink_white; run tftp_connect_state; run blink_disable; run disable_white; run enable_blue; run blink_blue; run setethupdate && run update_followup && run blink_disable && run disable_blue && run enable_green && run blink_green && run reload_on_reset && run set_out2_high
 upgrade_available=0
 usbargs=ip=off root=/dev/sda2 rw rootfstype=ext3 rootwait
 usbboot=run setup; setenv bootargs ${defargs} ${setupargs} ${usbargs} ${vidargs}; echo Booting from USB stick...; usb start && run usbdtbload; load usb 0:1 ${kernel_addr_r} ${boot_file} && run fdt_fixup && bootm ${kernel_addr_r} - ${dtbparam}

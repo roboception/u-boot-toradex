@@ -174,7 +174,8 @@
 		"run blink_disable; run disable_white; run enable_blue; run blink_blue; " \
 		"run setethupdate && run update_followup && " \
 		"run blink_disable && run disable_blue && run enable_green && run blink_green && " \
-		"run reload_on_reset\0" \
+		"run reload_on_reset && run set_out2_high\0" \
+		"set_out2_high=gpio set H1\0" \
 	USB_BOOTCMD \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 
