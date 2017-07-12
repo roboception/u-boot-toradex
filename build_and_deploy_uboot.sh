@@ -57,6 +57,10 @@ echo ""
 echo "Build U-Boot"
 cd ${UBOOT_DIR}
 make distclean
+# in some situations it seems like calling the cleanup command only once does not
+# cleanup from temporarily files reliably and results in compilation errors which
+# are not related to the actual explicit changes in the source code
+make distclean
 make ${UBOOT_CONFIG}
 make -j3 2>&1 | tee build.log
 
