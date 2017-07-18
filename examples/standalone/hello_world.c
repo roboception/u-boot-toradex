@@ -8,6 +8,21 @@
 #include <common.h>
 #include <exports.h>
 
+/*
+ * Make thumb work by providing a forwarder to the (thumb) entry point
+ * compiled for arm instruction set.
+ * Don't compile this for thumb only CPUs.
+ */
+#if defined(__thumb__) && defined(__ARM_ARCH_ISA_ARM)
+void __attribute__((unused)) __attribute__ ((naked)) dummy2 (void)
+{
+asm volatile ( \
+"	.code 32\n" \
+"	.arm\n" \
+"	ldr pc,=hello_world\n" );
+}
+#endif
+
 int hello_world (int argc, char * const argv[])
 {
 	int i;
