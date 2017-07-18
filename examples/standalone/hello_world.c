@@ -9,6 +9,14 @@
 #include <exports.h>
 
 /*
+ * add at least one variable. Without this at least in some cases the
+ * standalone application sometimes freezes, sometimes it prints 'random'
+ * stuff with printf ...
+ * I assume that this forces alignment of some linker sections.
+ */
+int dummy_var_in_text = 1;
+
+/*
  * Make thumb work by providing a forwarder to the (thumb) entry point
  * compiled for arm instruction set.
  * Don't compile this for thumb only CPUs.
