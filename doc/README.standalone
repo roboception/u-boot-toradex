@@ -53,7 +53,7 @@ Design Notes on Exporting U-Boot Functions to Standalone Applications:
 			Load address	Start address
 	x86		0x00040000	0x00040000
 	PowerPC		0x00040000	0x00040004
-	ARM		0x0c100000	0x0c100000
+	ARM		CONFIG_LOADADDR	CONFIG_LOADADDR
 	MIPS		0x80200000	0x80200000
 	Blackfin	0x00001000	0x00001000
 	NDS32		0x00300000	0x00300000
