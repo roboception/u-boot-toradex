@@ -408,7 +408,7 @@ ulong board_get_usable_ram_top(ulong total_size)
 {
 	/* Reserve last 1MiB for M4 on modules with 256MiB RAM */
 	if (gd->ram_size == SZ_256M)
-		return gd->ram_top - SZ_1M;
+		return gd->ram_top - SZ_2M;
 	else
 		return gd->ram_top;
 }
@@ -438,7 +438,7 @@ int ft_board_setup(void *blob, bd_t *bd)
 		 * alignment for Linux due to MMU section size restrictions).
 		 */
 		start[0] = gd->bd->bi_dram[0].start;
-		size[0] = SZ_256M - SZ_1M;
+		size[0] = SZ_256M - SZ_2M;
 
 		/* If needed, create a second entry for memory beyond 256M */
 		if (gd->bd->bi_dram[0].size > SZ_256M) {
