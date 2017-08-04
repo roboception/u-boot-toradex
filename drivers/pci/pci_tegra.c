@@ -19,6 +19,7 @@
 #include <fdtdec.h>
 #include <malloc.h>
 #include <pci.h>
+#include <pci_tegra.h>
 #include <power-domain.h>
 #include <reset.h>
 
@@ -898,7 +899,7 @@ static unsigned long tegra_pcie_port_get_pex_ctrl(struct tegra_pcie_port *port)
 	return ret;
 }
 
-static void tegra_pcie_port_reset(struct tegra_pcie_port *port)
+void tegra_pcie_port_reset(struct tegra_pcie_port *port)
 {
 	unsigned long ctrl = tegra_pcie_port_get_pex_ctrl(port);
 	unsigned long value;
@@ -913,6 +914,16 @@ static void tegra_pcie_port_reset(struct tegra_pcie_port *port)
 	value = afi_readl(port->pcie, ctrl);
 	value |= AFI_PEX_CTRL_RST;
 	afi_writel(port->pcie, value, ctrl);
+}
+
+int tegra_pcie_port_index_of_port(struct tegra_pcie_port *port)
+{
+	return port->index;
+}
+
+void __weak tegra_pcie_board_port_reset(struct tegra_pcie_port *port)
+{
+	tegra_pcie_port_reset(port);
 }
 
 static void tegra_pcie_port_enable(struct tegra_pcie_port *port)
@@ -933,7 +944,7 @@ static void tegra_pcie_port_enable(struct tegra_pcie_port *port)
 
 	afi_writel(pcie, value, ctrl);
 
-	tegra_pcie_port_reset(port);
+	tegra_pcie_board_port_reset(port);
 
 	if (soc->force_pca_enable) {
 		value = rp_readl(port, RP_VEND_CTL2);
@@ -984,7 +995,7 @@ static bool tegra_pcie_port_check_link(struct tegra_pcie_port *port)
 		} while (--timeout);
 
 retry:
-		tegra_pcie_port_reset(port);
+		tegra_pcie_board_port_reset(port);
 	} while (--retries);
 
 	return false;
