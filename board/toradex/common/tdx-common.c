@@ -67,19 +67,25 @@ int show_board_info(void)
 	unsigned char ethaddr[6];
 
 	if (read_tdx_cfg_block()) {
-		printf("Missing Toradex config block\n");
+		printf("MISSING TORADEX CONFIG BLOCK\n");
+		tdx_eth_addr.oui = htonl(0x00142dUL << 8);
+		tdx_eth_addr.nic = htonl(tdx_serial << 8);
 		checkboard();
-		return 0;
-	}
+	} else {
+		/* board serial-number */
+		sprintf(tdx_serial_str, "%08u", tdx_serial);
+		sprintf(tdx_board_rev_str, "V%1d.%1d%c",
+			tdx_hw_tag.ver_major,
+			tdx_hw_tag.ver_minor,
+			(char)tdx_hw_tag.ver_assembly + 'A');
 
-	/* board serial-number */
-	sprintf(tdx_serial_str, "%08u", tdx_serial);
-	sprintf(tdx_board_rev_str, "V%1d.%1d%c",
-		tdx_hw_tag.ver_major,
-		tdx_hw_tag.ver_minor,
-		(char)tdx_hw_tag.ver_assembly + 'A');
+		setenv("serial#", tdx_serial_str);
 
-	setenv("serial#", tdx_serial_str);
+		printf("Model: Toradex %s %s, Serial# %s\n",
+		       toradex_modules[tdx_hw_tag.prodid],
+		       tdx_board_rev_str,
+		       tdx_serial_str);
+       }
 
 	/*
 	 * Check if environment contains a valid MAC address,
@@ -99,11 +105,6 @@ int show_board_info(void)
 		eth_setenv_enetaddr("eth1addr", ethaddr);
 	}
 #endif
-
-	printf("Model: Toradex %s %s, Serial# %s\n",
-	       toradex_modules[tdx_hw_tag.prodid],
-	       tdx_board_rev_str,
-	       tdx_serial_str);
 
 	return 0;
 }
