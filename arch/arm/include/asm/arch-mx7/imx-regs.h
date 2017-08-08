@@ -1213,6 +1213,7 @@ extern void pcie_power_off(void);
 #define BOOT_TYPE_QSPI		0x4
 #define BOOT_TYPE_WEIM		0x5
 #define BOOT_TYPE_SPINOR	0x6
+#define BOOT_TYPE_USB_SDP	0xf
 
 struct bootrom_sw_info {
 	u8 reserved_1;

@@ -432,6 +432,9 @@ enum boot_device get_boot_device(void)
 	case BOOT_TYPE_SPINOR:
 		boot_dev = SPI_NOR_BOOT;
 		break;
+	case BOOT_TYPE_USB_SDP:
+		boot_dev = USB_SDP_BOOT;
+		break;
 	default:
 		break;
 	}
