@@ -36,6 +36,7 @@
     "upgrade_available=0\0"                                             \
                                                                         \
     "mender_boot_part=" __stringify(MENDER_ROOTFS_PART_A_NUMBER) "\0"   \
+    "desired_boot_part=" __stringify(MENDER_ROOTFS_PART_A_NUMBER) "\0"   \    
                                                                         \
     "mender_uboot_boot=" MENDER_UBOOT_STORAGE_INTERFACE " " __stringify(MENDER_UBOOT_STORAGE_DEVICE) ":" __stringify(MENDER_BOOT_PART_NUMBER) "\0" \
                                                                         \

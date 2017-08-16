@@ -67,7 +67,7 @@
 #define CONFIG_SERVERIP		192.168.10.1
 
 #define CONFIG_BOOTCOMMAND \
-	"run pinupdate && run forever; run emmcboot; run mender_switchpart; run emmcboot; run tftpupdate"
+	"run pinupdate && run forever; run emmcboot; run mender_switchpart; run emmcboot"
 
 #define DFU_ALT_EMMC_INFO	"apalis-tk1.img raw 0x0 0x500 mmcpart 1; " \
 				"boot part 0 1 mmcpart 0; " \
@@ -168,14 +168,14 @@
 		"ethaddr 00:14:2d:00:00:00; fi; pci enum;\0" \
 	"chkupdscr=if tftpboot ${loadaddr} flash_eth.img; then echo update script " \
 		"accessible && true; else echo update script not accessible && false; fi;\0" \
-	"tftp_connect_state=run init_eth; until run chkupdscr; " \
-		"do echo try to reconnect && run init_eth; done;\0" \
-	"tftpupdate=run blink_init; run blink_white; run tftp_connect_state; " \
+	"tftp_try_connect=run init_eth; setenv serverip 192.168.10.1; setenv ipaddr 192.168.10.2; setenv netmask 255.255.255.0; " \
+		"until run chkupdscr; do echo try to reconnect && run init_eth; done;\0" \
+	"tftpupdate=run blink_init; run blink_white; run tftp_try_connect; " \
 		"run blink_disable; run disable_white; run enable_blue; run blink_blue; " \
 		"run setethupdate && run update_followup && " \
 		"run blink_disable && run disable_blue && run enable_green && run blink_green && " \
-		"run reload_on_reset && run set_out2_high\0" \
-		"set_out2_high=gpio set H1\0" \
+		"run set_out2_high; run reload_on_reset\0" \
+	"set_out2_high=gpio set H1\0" \
 	USB_BOOTCMD \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 

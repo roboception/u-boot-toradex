@@ -15,7 +15,7 @@ bootcmd_dhcp=run boot_net_usb_start; run boot_net_pci_enum; if dhcp ${scriptaddr
 bootcmd_mmc0=setenv devnum 0; run mmc_boot
 bootcmd_mmc1=setenv devnum 1; run mmc_boot
 bootcmd_pxe=run boot_net_usb_start; run boot_net_pci_enum; dhcp; if pxe get; then pxe boot; fi
-bootcmd=run pinupdate && run forever; run emmcboot; run mender_switchpart; run emmcboot; run tftpupdate
+bootcmd=run pinupdate && run forever; run emmcboot; run mender_switchpart; run emmcboot
 bootcmd_usb0=setenv devnum 0; run usb_boot
 bootcount=0
 bootdelay=1
@@ -34,6 +34,7 @@ chkupdscr=if tftpboot ${loadaddr} flash_eth.img; then echo update script accessi
 console=ttyS0
 cpu=armv7
 defargs=lp0_vec=2064@0xf46ff000 core_edp_mv=1150 core_edp_ma=4000 usb_port_owner_info=2 lane_owner_info=6 emc_max_dvfs=0 cma=256M panic=60
+desired_boot_part=2
 dfu_alt_info=apalis-tk1.img raw 0x0 0x500 mmcpart 1; boot part 0 1 mmcpart 0; rootfs part 0 2 mmcpart 0; uImage fat 0 1 mmcpart 0; tegra124-apalis-eval.dtb fat 0 1 mmcpart 0
 disable_blue=i2c mw 0x32 17 00
 disable_green=i2c mw 0x32 16 00
@@ -93,8 +94,8 @@ soc=tegra124
 stderr=serial
 stdin=serial
 stdout=serial
-tftp_connect_state=run init_eth; until run chkupdscr; do echo try to reconnect && run init_eth; done;
-tftpupdate=run blink_init; run blink_white; run tftp_connect_state; run blink_disable; run disable_white; run enable_blue; run blink_blue; run setethupdate && run update_followup && run blink_disable && run disable_blue && run enable_green && run blink_green && run reload_on_reset && run set_out2_high
+tftp_try_connect=run init_eth; setenv serverip 192.168.10.1; setenv ipaddr 192.168.10.2; setenv netmask 255.255.255.0; until run chkupdscr; do echo try to reconnect && run init_eth; done;
+tftpupdate=run blink_init; run blink_white; run tftp_try_connect; run blink_disable; run disable_white; run enable_blue; run blink_blue; run setethupdate && run update_followup && run blink_disable && run disable_blue && run enable_green && run blink_green && run set_out2_high; run reload_on_reset
 upgrade_available=0
 usbargs=ip=off root=/dev/sda2 rw rootwait
 usbboot=run setup; setenv bootargs ${defargs} ${setupargs} ${usbargs} ${vidargs}; echo Booting from USB stick...; usb start && run usbdtbload; load usb 0:1 ${kernel_addr_r} ${boot_file} && run fdt_fixup && bootm ${kernel_addr_r} - ${dtbparam}
