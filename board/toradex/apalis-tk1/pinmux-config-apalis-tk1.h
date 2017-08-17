@@ -42,7 +42,7 @@ static const struct tegra_gpio_config apalis_tk1_gpio_inits[] = {
 	GPIO_INIT(R,    1,   OUT0), /* Shift_CTRL_Dir_In[1] */
 	GPIO_INIT(R,    2,   OUT0), /* Shift_CTRL_OE[3] */
 	GPIO_INIT(S,    3,   OUT0), /* Shift_CTRL_Dir_In[2] */
-	GPIO_INIT(U,    4,   OUT1),
+	GPIO_INIT(U,    4,   OUT0), /* RESET_MOCI_CTRL */
 	GPIO_INIT(W,    3,   IN),
 	GPIO_INIT(W,    5,   IN),
 	GPIO_INIT(BB,   0,  IN),
@@ -51,6 +51,7 @@ static const struct tegra_gpio_config apalis_tk1_gpio_inits[] = {
 	GPIO_INIT(BB,   5,  OUT1),
 	GPIO_INIT(BB,   6,  OUT0),
 	GPIO_INIT(CC,   5,  IN),
+	GPIO_INIT(DD,   2,  OUT1), /* Apalis GPIO8 aka FAN_EN */
 	GPIO_INIT(DD,   3,  IN),
 	GPIO_INIT(EE,   3,  IN),
 	GPIO_INIT(EE,   5,  IN),
@@ -242,7 +243,7 @@ static const struct pmux_pingrp_config apalis_tk1_pingrps[] = {
 	PINCFG(SDMMC4_CLK_PCC4,        SDMMC4,       NORMAL, NORMAL,   INPUT,   DEFAULT, DEFAULT),
 	PINCFG(CLK2_REQ_PCC5,          RSVD2,        NORMAL, NORMAL,   INPUT,   DEFAULT, DEFAULT),
 	PINCFG(PEX_L0_RST_N_PDD1,      RSVD2,        NORMAL, NORMAL,   INPUT,   DEFAULT, DEFAULT),
-	PINCFG(PEX_L0_CLKREQ_N_PDD2,   RSVD2,        NORMAL, NORMAL,   INPUT,   DEFAULT, DEFAULT),
+	PINCFG(PEX_L0_CLKREQ_N_PDD2,   RSVD2,        NORMAL, NORMAL,   OUTPUT,   DEFAULT, DEFAULT),
 	PINCFG(PEX_WAKE_N_PDD3,        RSVD2,        NORMAL, TRISTATE, INPUT,   DEFAULT, DEFAULT),
 	PINCFG(PEX_L1_RST_N_PDD5,      RSVD2,        NORMAL, NORMAL,   INPUT,   DEFAULT, DEFAULT),
 	PINCFG(PEX_L1_CLKREQ_N_PDD6,   RSVD2,        NORMAL, NORMAL,   INPUT,   DEFAULT, DEFAULT),

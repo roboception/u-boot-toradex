@@ -257,8 +257,8 @@ static int mxs_nand_get_ecc_strength(struct mtd_info *mtd)
 #if defined(CONFIG_NAND_MXS_BCH_LEGACY_GEO)
 		ecc_strength = ((page_oob_size - MXS_NAND_METADATA_SIZE) * 8)
 			/(galois_field * mxs_nand_ecc_chunk_cnt(mtd->writesize));
-		ecc_strength += ecc_strength & 1;
-		ecc_strength = min(ecc_strength, MXS_NAND_MAX_ECC_STRENGTH);
+		ecc_strength = round_down(ecc_strength, 2);
+		ecc_strength = min(ecc_strength, max_ecc_strength_supported);
 #endif
 	}
 	return 0;
@@ -1325,6 +1325,10 @@ int board_nand_init(struct nand_chip *nand)
 		goto err2;
 
 	memset(&fake_ecc_layout, 0, sizeof(fake_ecc_layout));
+
+#ifdef CONFIG_SYS_NAND_USE_FLASH_BBT
+	nand->bbt_options |= NAND_BBT_USE_FLASH | NAND_BBT_NO_OOB;
+#endif
 
 	nand_set_controller_data(nand, nand_info);
 	nand->options |= NAND_NO_SUBPAGE_WRITE | NAND_NEED_BBTSCAN;

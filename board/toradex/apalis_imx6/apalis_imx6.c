@@ -27,6 +27,7 @@
 #include <dm/platform_data/serial_mxc.h>
 #include <dm/platdata.h>
 #include <fsl_esdhc.h>
+#include <g_dnl.h>
 #include <i2c.h>
 #include <imx_thermal.h>
 #include <linux/errno.h>
@@ -299,6 +300,9 @@ iomux_v3_cfg_t const usb_pads[] = {
  * UARTs are used in DTE mode, switch the mode on all UARTs before
  * any pinmuxing connects a (DCE) output to a transceiver output.
  */
+#define UCR3		0x88	/* FIFO Control Register */
+#define UCR3_RI		(1<<8)	/* RIDELT DTE mode */
+#define UCR3_DCD	(1<<9)	/* DCDDELT DTE mode */
 #define UFCR		0x90	/* FIFO Control Register */
 #define UFCR_DCEDTE	(1<<6)	/* DCE=0 */
 
@@ -308,6 +312,11 @@ static void setup_dtemode_uart(void)
 	setbits_le32((u32 *)(UART2_BASE + UFCR), UFCR_DCEDTE);
 	setbits_le32((u32 *)(UART4_BASE + UFCR), UFCR_DCEDTE);
 	setbits_le32((u32 *)(UART5_BASE + UFCR), UFCR_DCEDTE);
+
+	clrbits_le32((u32 *)(UART1_BASE + UCR3), UCR3_DCD | UCR3_RI);
+	clrbits_le32((u32 *)(UART2_BASE + UCR3), UCR3_DCD | UCR3_RI);
+	clrbits_le32((u32 *)(UART4_BASE + UCR3), UCR3_DCD | UCR3_RI);
+	clrbits_le32((u32 *)(UART5_BASE + UCR3), UCR3_DCD | UCR3_RI);
 }
 static void setup_dcemode_uart(void)
 {
@@ -566,53 +575,6 @@ static iomux_v3_cfg_t const rgb_pads[] = {
 	MX6_PAD_EIM_D27__IPU1_DISP1_DATA23 | MUX_PAD_CTRL(OUTPUT_RGB),
 	MX6_PAD_EIM_D30__IPU1_DISP1_DATA21 | MUX_PAD_CTRL(OUTPUT_RGB),
 	MX6_PAD_EIM_D31__IPU1_DISP1_DATA20 | MUX_PAD_CTRL(OUTPUT_RGB),
-};
-
-static iomux_v3_cfg_t const vga_pads[] = {
-#ifdef FOR_DL_SOLO
-	/* DualLite/Solo doesn't have IPU2 */
-	MX6_PAD_DI0_DISP_CLK__IPU1_DI0_DISP_CLK,
-	MX6_PAD_DI0_PIN15__IPU1_DI0_PIN15,
-	MX6_PAD_DI0_PIN2__IPU1_DI0_PIN02,
-	MX6_PAD_DI0_PIN3__IPU1_DI0_PIN03,
-	MX6_PAD_DISP0_DAT0__IPU1_DISP0_DATA00,
-	MX6_PAD_DISP0_DAT1__IPU1_DISP0_DATA01,
-	MX6_PAD_DISP0_DAT2__IPU1_DISP0_DATA02,
-	MX6_PAD_DISP0_DAT3__IPU1_DISP0_DATA03,
-	MX6_PAD_DISP0_DAT4__IPU1_DISP0_DATA04,
-	MX6_PAD_DISP0_DAT5__IPU1_DISP0_DATA05,
-	MX6_PAD_DISP0_DAT6__IPU1_DISP0_DATA06,
-	MX6_PAD_DISP0_DAT7__IPU1_DISP0_DATA07,
-	MX6_PAD_DISP0_DAT8__IPU1_DISP0_DATA08,
-	MX6_PAD_DISP0_DAT9__IPU1_DISP0_DATA09,
-	MX6_PAD_DISP0_DAT10__IPU1_DISP0_DATA10,
-	MX6_PAD_DISP0_DAT11__IPU1_DISP0_DATA11,
-	MX6_PAD_DISP0_DAT12__IPU1_DISP0_DATA12,
-	MX6_PAD_DISP0_DAT13__IPU1_DISP0_DATA13,
-	MX6_PAD_DISP0_DAT14__IPU1_DISP0_DATA14,
-	MX6_PAD_DISP0_DAT15__IPU1_DISP0_DATA15,
-#else
-	MX6_PAD_DI0_DISP_CLK__IPU1_DI0_DISP_CLK,
-	MX6_PAD_DI0_PIN15__IPU2_DI0_PIN15,
-	MX6_PAD_DI0_PIN2__IPU2_DI0_PIN02,
-	MX6_PAD_DI0_PIN3__IPU2_DI0_PIN03,
-	MX6_PAD_DISP0_DAT0__IPU2_DISP0_DATA00,
-	MX6_PAD_DISP0_DAT1__IPU2_DISP0_DATA01,
-	MX6_PAD_DISP0_DAT2__IPU2_DISP0_DATA02,
-	MX6_PAD_DISP0_DAT3__IPU2_DISP0_DATA03,
-	MX6_PAD_DISP0_DAT4__IPU2_DISP0_DATA04,
-	MX6_PAD_DISP0_DAT5__IPU2_DISP0_DATA05,
-	MX6_PAD_DISP0_DAT6__IPU2_DISP0_DATA06,
-	MX6_PAD_DISP0_DAT7__IPU2_DISP0_DATA07,
-	MX6_PAD_DISP0_DAT8__IPU2_DISP0_DATA08,
-	MX6_PAD_DISP0_DAT9__IPU2_DISP0_DATA09,
-	MX6_PAD_DISP0_DAT10__IPU2_DISP0_DATA10,
-	MX6_PAD_DISP0_DAT11__IPU2_DISP0_DATA11,
-	MX6_PAD_DISP0_DAT12__IPU2_DISP0_DATA12,
-	MX6_PAD_DISP0_DAT13__IPU2_DISP0_DATA13,
-	MX6_PAD_DISP0_DAT14__IPU2_DISP0_DATA14,
-	MX6_PAD_DISP0_DAT15__IPU2_DISP0_DATA15,
-#endif
 };
 
 static void do_enable_hdmi(struct display_info_t const *dev)
@@ -874,6 +836,14 @@ int board_late_init(void)
 	}
 #endif /* CONFIG_TDX_APALIS_IMX6_V1_0 */
 #endif /* CONFIG_REVISION_TAG */
+
+#ifdef CONFIG_CMD_USB_SDP
+	if (is_boot_from_usb()) {
+		printf("Serial Downloader recovery mode, using sdp command\n");
+		setenv("bootdelay", "0");
+		setenv("bootcmd", "sdp 0");
+	}
+#endif /* CONFIG_CMD_USB_SDP */
 
 	return 0;
 }
@@ -1234,13 +1204,17 @@ static void spl_dram_init(void)
 	switch (get_cpu_temp_grade(&minc, &maxc)) {
 	case TEMP_COMMERCIAL:
 	case TEMP_EXTCOMMERCIAL:
+#ifndef CONFIG_SPL_SILENT_CONSOLE
 		puts("Commercial temperature grade DDR3 timings.\n");
+#endif
 		ddr_init(mx6_com_dcd_table, ARRAY_SIZE(mx6_com_dcd_table));
 		break;
 	case TEMP_INDUSTRIAL:
 	case TEMP_AUTOMOTIVE:
 	default:
+#ifndef CONFIG_SPL_SILENT_CONSOLE
 		puts("Industrial temperature grade DDR3 timings.\n");
+#endif
 		ddr_init(mx6_it_dcd_table, ARRAY_SIZE(mx6_it_dcd_table));
 		break;
 	};
@@ -1282,6 +1256,18 @@ void board_init_f(ulong dummy)
 void reset_cpu(ulong addr)
 {
 }
+
+#ifdef CONFIG_SPL_USB_GADGET_SUPPORT
+int g_dnl_bind_fixup(struct usb_device_descriptor *dev, const char *name)
+{
+	unsigned short usb_pid;
+
+	usb_pid = TORADEX_USB_PRODUCT_NUM_OFFSET + 0xfff;
+	put_unaligned(usb_pid, &dev->idProduct);
+
+	return 0;
+}
+#endif
 
 #endif
 

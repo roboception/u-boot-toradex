@@ -137,14 +137,15 @@
 		"${board}/flash_blk.img && source ${loadaddr}\0" \
 	"setup=setenv setupargs " \
 		"console=tty1 console=${console}" \
-		",${baudrate}n8 ${memargs} consoleblank=0 ${mtdparts}\0" \
+		",${baudrate}n8 ${memargs} consoleblank=0\0" \
 	"setupdate=run setsdupdate || run setusbupdate || run setethupdate\0" \
 	"setusbupdate=usb start && setenv interface usb && " \
 		"fatload ${interface} 0:1 ${loadaddr} " \
 		"${board}/flash_blk.img && source ${loadaddr}\0" \
 	"splashpos=m,m\0" \
 	"videomode=video=ctfb:x:640,y:480,depth:18,pclk:39722,le:48,ri:16,up:33,lo:10,hs:96,vs:2,sync:0,vmode:0\0" \
-	"updlevel=2\0"
+	"updlevel=2\0" \
+	"vidargs=video=mxsfb:640x480M-16@60"
 
 /* Miscellaneous configurable options */
 #define CONFIG_SYS_LONGHELP
@@ -196,6 +197,7 @@
 #define CONFIG_SYS_NAND_5_ADDR_CYCLE
 #define CONFIG_SYS_NAND_ONFI_DETECTION
 #define CONFIG_SYS_NAND_MX7_GPMI_62_ECC_BYTES
+#define CONFIG_SYS_NAND_USE_FLASH_BBT
 #define CONFIG_CMD_NAND_TORTURE
 
 /* UBI stuff */

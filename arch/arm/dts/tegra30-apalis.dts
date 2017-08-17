@@ -43,16 +43,19 @@
 		vddio-pex-ctl-supply = <&sys_3v3_reg>;
 		hvdd-pex-supply = <&sys_3v3_reg>;
 
+		/* Apalis Type Specific 4 Lane PCIe */
 		pci@1,0 {
 			/* TS_DIFF1/2/3/4 left disabled */
 			nvidia,num-lanes = <4>;
 		};
 
+		/* Apalis PCIe */
 		pci@2,0 {
 			/* PCIE1_RX/TX left disabled */
 			nvidia,num-lanes = <1>;
 		};
 
+		/* I210 Gigabit Ethernet Controller (On-module) */
 		pci@3,0 {
 			status = "okay";
 			nvidia,num-lanes = <1>;
@@ -92,7 +95,7 @@
 	 */
 	i2c@7000c000 {
 		status = "okay";
-		clock-frequency = <100000>;
+		clock-frequency = <400000>;
 	};
 
 	/* GEN2_I2C: unused */
@@ -103,13 +106,13 @@
 	 */
 	i2c@7000c500 {
 		status = "okay";
-		clock-frequency = <100000>;
+		clock-frequency = <400000>;
 	};
 
 	/* DDC: I2C2_SDA/SCL on MXM3 pin 205/207 (e.g. display EDID) */
 	i2c@7000c700 {
 		status = "okay";
-		clock-frequency = <100000>;
+		clock-frequency = <10000>;
 	};
 
 	/*

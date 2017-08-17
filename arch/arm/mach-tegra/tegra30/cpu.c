@@ -31,6 +31,10 @@ void tegra_i2c_ll_write_data(uint data, uint config)
 	writel(config, &reg->cnfg);
 }
 
+#define TPS62362_I2C_ADDR		0xC0	/* Linux 0x60 */
+#define TPS62362_SET0_REG		0x00
+#define TPS62362_SET0_DATA		(0x2B00 | TPS62362_SET0_REG)
+
 #define TPS62366A_I2C_ADDR		0xC0
 #define TPS62366A_SET1_REG		0x01
 #define TPS62366A_SET1_DATA		(0x4600 | TPS62366A_SET1_REG)
@@ -39,7 +43,7 @@ void tegra_i2c_ll_write_data(uint data, uint config)
 #define TPS62361B_SET3_REG		0x03
 #define TPS62361B_SET3_DATA		(0x4600 | TPS62361B_SET3_REG)
 
-#define TPS65911_I2C_ADDR		0x5A
+#define TPS65911_I2C_ADDR		0x5A	/* Linux 0x2d */
 #define TPS65911_GPIO1_REG		0x61
 #define TPS65911_GPIO1_DATA		(0x0000 | TPS65911_GPIO1_REG)
 #define TPS65911_VDDCTRL_OP_REG		0x28
@@ -59,6 +63,12 @@ static void enable_cpu_power_rail(void)
 	writel(reg, &pmc->pmc_cntrl);
 
 	/* Set VDD_CORE to 1.200V. */
+#ifdef CONFIG_TEGRA_VDD_CORE_TPS62362_SET0
+	udelay(1000);
+	tegra_i2c_ll_write_addr(TPS62362_I2C_ADDR, 2);
+	tegra_i2c_ll_write_data(TPS62362_SET0_DATA, I2C_SEND_2_BYTES);
+	udelay(1000);
+#endif
 #ifdef CONFIG_TEGRA_VDD_CORE_TPS62366A_SET1
 	tegra_i2c_ll_write_addr(TPS62366A_I2C_ADDR, 2);
 	tegra_i2c_ll_write_data(TPS62366A_SET1_DATA, I2C_SEND_2_BYTES);

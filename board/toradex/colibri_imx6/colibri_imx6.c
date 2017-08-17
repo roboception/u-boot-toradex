@@ -26,6 +26,7 @@
 #include <dm/platform_data/serial_mxc.h>
 #include <dm/platdata.h>
 #include <fsl_esdhc.h>
+#include <g_dnl.h>
 #include <i2c.h>
 #include <imx_thermal.h>
 #include <linux/errno.h>
@@ -34,6 +35,7 @@
 #include <miiphy.h>
 #include <mmc.h>
 #include <netdev.h>
+#include <libfdt.h>
 
 #include "../common/tdx-cfg-block.h"
 #ifdef CONFIG_TDX_CMD_IMX_MFGR
@@ -260,6 +262,9 @@ iomux_v3_cfg_t const usb_pads[] = {
  * UARTs are used in DTE mode, switch the mode on all UARTs before
  * any pinmuxing connects a (DCE) output to a transceiver output.
  */
+#define UCR3		0x88	/* FIFO Control Register */
+#define UCR3_RI		(1<<8)	/* RIDELT DTE mode */
+#define UCR3_DCD	(1<<9)	/* DCDDELT DTE mode */
 #define UFCR		0x90	/* FIFO Control Register */
 #define UFCR_DCEDTE	(1<<6)	/* DCE=0 */
 
@@ -268,6 +273,10 @@ static void setup_dtemode_uart(void)
 	setbits_le32((u32 *)(UART1_BASE + UFCR), UFCR_DCEDTE);
 	setbits_le32((u32 *)(UART2_BASE + UFCR), UFCR_DCEDTE);
 	setbits_le32((u32 *)(UART3_BASE + UFCR), UFCR_DCEDTE);
+
+	clrbits_le32((u32 *)(UART1_BASE + UCR3), UCR3_DCD | UCR3_RI);
+	clrbits_le32((u32 *)(UART2_BASE + UCR3), UCR3_DCD | UCR3_RI);
+	clrbits_le32((u32 *)(UART3_BASE + UCR3), UCR3_DCD | UCR3_RI);
 }
 
 static void setup_iomux_uart(void)
@@ -677,6 +686,14 @@ int board_late_init(void)
 	setenv("board_rev", env_str);
 #endif
 
+#ifdef CONFIG_CMD_USB_SDP
+	if (is_boot_from_usb()) {
+		printf("Serial Downloader recovery mode, using sdp command\n");
+		setenv("bootdelay", "0");
+		setenv("bootcmd", "sdp 0");
+	}
+#endif /* CONFIG_CMD_USB_SDP */
+
 	return 0;
 }
 #endif /* CONFIG_BOARD_LATE_INIT */
@@ -710,7 +727,18 @@ int checkboard(void)
 #if defined(CONFIG_OF_LIBFDT) && defined(CONFIG_OF_BOARD_SETUP)
 int ft_board_setup(void *blob, bd_t *bd)
 {
-	return ft_common_board_setup(blob, bd);
+	u32 cma_size;
+
+	ft_common_board_setup(blob, bd);
+
+	cma_size = getenv_ulong("cma-size", 10, 320 * 1024 * 1024);
+	cma_size = min((u32)(gd->ram_size >> 1), cma_size);
+
+	fdt_setprop_u32(blob,
+			fdt_path_offset (blob, "/reserved-memory/linux,cma"),
+			"size",
+			cma_size);
+	return 0;
 }
 #endif
 
@@ -1061,10 +1089,14 @@ static void spl_dram_init(void)
 	case TEMP_COMMERCIAL:
 	case TEMP_EXTCOMMERCIAL:
 		if (is_cpu_type(MXC_CPU_MX6DL)) {
+#ifndef CONFIG_SPL_SILENT_CONSOLE
 			puts("Commercial temperature grade DDR3 timings, 64bit bus width.\n");
+#endif
 			ddr_init(mx6dl_dcd_table, ARRAY_SIZE(mx6dl_dcd_table));
 		} else {
+#ifndef CONFIG_SPL_SILENT_CONSOLE
 			puts("Commercial temperature grade DDR3 timings, 32bit bus width.\n");
+#endif
 			ddr_init(mx6s_dcd_table, ARRAY_SIZE(mx6s_dcd_table));
 		}
 		break;
@@ -1072,9 +1104,14 @@ static void spl_dram_init(void)
 	case TEMP_AUTOMOTIVE:
 	default:
 		if (is_cpu_type(MXC_CPU_MX6DL)) {
+#ifndef CONFIG_SPL_SILENT_CONSOLE
+			puts("Industrial temperature grade DDR3 timings, 64bit bus width.\n");
+#endif
 			ddr_init(mx6dl_dcd_table, ARRAY_SIZE(mx6dl_dcd_table));
 		} else {
+#ifndef CONFIG_SPL_SILENT_CONSOLE
 			puts("Industrial temperature grade DDR3 timings, 32bit bus width.\n");
+#endif
 			ddr_init(mx6s_dcd_table, ARRAY_SIZE(mx6s_dcd_table));
 		}
 		break;
@@ -1115,6 +1152,18 @@ void board_init_f(ulong dummy)
 void reset_cpu(ulong addr)
 {
 }
+
+#ifdef CONFIG_SPL_USB_GADGET_SUPPORT
+int g_dnl_bind_fixup(struct usb_device_descriptor *dev, const char *name)
+{
+	unsigned short usb_pid;
+
+	usb_pid = TORADEX_USB_PRODUCT_NUM_OFFSET + 0xfff;
+	put_unaligned(usb_pid, &dev->idProduct);
+
+	return 0;
+}
+#endif
 
 #endif
 

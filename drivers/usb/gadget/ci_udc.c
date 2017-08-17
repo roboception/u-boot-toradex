@@ -836,8 +836,10 @@ void udc_irq(void)
 #else
 		n = readl(&udc->epstat);
 #endif
-		if (n & EPT_RX(0))
+		if (n & EPT_RX(0)) {
 			handle_setup();
+			udelay(100);
+		}
 
 		n = readl(&udc->epcomp);
 		if (n != 0)

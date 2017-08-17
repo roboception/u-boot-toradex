@@ -319,6 +319,9 @@ struct boot_device_name boot_name_table[] = {
 #ifdef CONFIG_SPL_DFU_SUPPORT
 	{ BOOT_DEVICE_DFU, "USB DFU" },
 #endif
+#ifdef CONFIG_SPL_USB_SDP_SUPPORT
+	{ BOOT_DEVICE_SDP, "USB SDP" },
+#endif
 #ifdef CONFIG_SPL_SATA_SUPPORT
 	{ BOOT_DEVICE_SATA, "SATA" },
 #endif
@@ -328,6 +331,7 @@ struct boot_device_name boot_name_table[] = {
 
 static void announce_boot_device(u32 boot_device)
 {
+#ifndef CONFIG_SPL_SILENT_CONSOLE
 	int i;
 
 	puts("Trying to boot from ");
@@ -345,6 +349,7 @@ static void announce_boot_device(u32 boot_device)
 	}
 
 	printf("%s\n", boot_name_table[i].name);
+#endif
 }
 #else
 static inline void announce_boot_device(u32 boot_device) { }
@@ -457,12 +462,22 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	jump_to_image_no_args(&spl_image);
 }
 
+/* factor out puts, otherwise lto removes the version string when
+ * CONFIG_SPL_SILENT_CONSOLE is set */
+static void putsver(char *ver)
+{
+	if(ver[0] != 0)
+		puts(ver);
+}
+
 /*
  * This requires UART clocks to be enabled.  In order for this to work the
  * caller must ensure that the gd pointer is valid.
  */
 void preloader_console_init(void)
 {
+	char *ver = "\nU-Boot SPL " \
+		PLAIN_VERSION " (" U_BOOT_DATE " - " U_BOOT_TIME ")\n";
 	gd->bd = &bdata;
 	gd->baudrate = CONFIG_BAUDRATE;
 
@@ -470,10 +485,14 @@ void preloader_console_init(void)
 
 	gd->have_console = 1;
 
-	puts("\nU-Boot SPL " PLAIN_VERSION " (" U_BOOT_DATE " - " \
-			U_BOOT_TIME ")\n");
+#ifndef CONFIG_SPL_SILENT_CONSOLE
+	putsver(ver);
 #ifdef CONFIG_SPL_DISPLAY_PRINT
 	spl_display_print();
+#endif
+#else
+	ver[0] = 0;
+	putsver(ver);
 #endif
 }
 

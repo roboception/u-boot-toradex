@@ -18,12 +18,15 @@
 #include <dm/platform_data/serial_mxc.h>
 #include <fdt_support.h>
 #include <fsl_esdhc.h>
+#include <jffs2/load_kernel.h>
 #include <linux/sizes.h>
 #include <mmc.h>
 #include <miiphy.h>
+#include <mtd_node.h>
 #include <netdev.h>
 #include <power/pmic.h>
 #include <power/rn5t567_pmic.h>
+#include <usb.h>
 #include <usb/ehci-ci.h>
 #include "../common/tdx-common.h"
 
@@ -46,6 +49,8 @@ DECLARE_GLOBAL_DATA_PTR;
 #define NAND_PAD_CTRL (PAD_CTL_DSE_3P3V_49OHM | PAD_CTL_SRE_SLOW | PAD_CTL_HYS)
 
 #define NAND_PAD_READY0_CTRL (PAD_CTL_DSE_3P3V_49OHM | PAD_CTL_PUS_PU5KOHM)
+
+#define USB_CDET_GPIO	IMX_GPIO_NR(7, 14)
 
 int dram_init(void)
 {
@@ -70,6 +75,10 @@ static iomux_v3_cfg_t const usdhc1_pads[] = {
 	MX7D_PAD_SD1_DATA3__SD1_DATA3 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
 
 	MX7D_PAD_GPIO1_IO00__GPIO1_IO0 | MUX_PAD_CTRL(NO_PAD_CTRL),
+};
+
+static iomux_v3_cfg_t const usb_cdet_pads[] = {
+	MX7D_PAD_ENET1_CRS__GPIO7_IO14 | MUX_PAD_CTRL(NO_PAD_CTRL),
 };
 
 #ifdef CONFIG_NAND_MXS
@@ -99,22 +108,6 @@ static void setup_gpmi_nand(void)
 	set_clk_nand();
 }
 #endif
-
-static iomux_v3_cfg_t const usdhc3_emmc_pads[] = {
-	MX7D_PAD_SD3_CLK__SD3_CLK | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX7D_PAD_SD3_CMD__SD3_CMD | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX7D_PAD_SD3_DATA0__SD3_DATA0 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX7D_PAD_SD3_DATA1__SD3_DATA1 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX7D_PAD_SD3_DATA2__SD3_DATA2 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX7D_PAD_SD3_DATA3__SD3_DATA3 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX7D_PAD_SD3_DATA4__SD3_DATA4 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX7D_PAD_SD3_DATA5__SD3_DATA5 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX7D_PAD_SD3_DATA6__SD3_DATA6 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX7D_PAD_SD3_DATA7__SD3_DATA7 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-	MX7D_PAD_SD3_STROBE__SD3_STROBE	 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-
-	MX7D_PAD_SD3_RESET_B__GPIO6_IO11 | MUX_PAD_CTRL(USDHC_PAD_CTRL),
-};
 
 #ifdef CONFIG_VIDEO_MXS
 static iomux_v3_cfg_t const lcd_pads[] = {
@@ -320,6 +313,11 @@ int board_init(void)
 	setup_lcd();
 #endif
 
+#ifdef CONFIG_USB_EHCI_MX7
+	imx_iomux_v3_setup_multiple_pads(usb_cdet_pads, ARRAY_SIZE(usb_cdet_pads));
+	gpio_request(USB_CDET_GPIO, "usb-cdet-gpio");
+#endif
+
 	return 0;
 }
 
@@ -336,6 +334,14 @@ int board_late_init(void)
 {
 #ifdef CONFIG_CMD_BMODE
 	add_board_boot_modes(board_boot_modes);
+#endif
+
+#ifdef CONFIG_CMD_USB_SDP
+	if (get_boot_device() == USB_SDP_BOOT) {
+		printf("Serial Downloader recovery mode, using sdp command\n");
+		setenv("bootdelay", "0");
+		setenv("bootcmd", "sdp 0");
+	}
 #endif
 
 	return 0;
@@ -359,6 +365,22 @@ int power_init_board(void)
 
 	/* set judge and press timer of N_OE to minimal values */
 	pmic_clrsetbits(dev, RN5T567_NOETIMSETCNT, 0x7, 0);
+
+	/* configure sleep slot for 3.3V Ethernet */
+	reg = pmic_reg_read(dev, RN5T567_LDO1_SLOT);
+	reg = (reg & 0xf0) | reg >> 4;
+	pmic_reg_write(dev, RN5T567_LDO1_SLOT, reg);
+
+	/* disable DCDC2 discharge to avoid backfeeding through VFB2 */
+	pmic_clrsetbits(dev, RN5T567_DC2CTL, 0x2, 0);
+
+	/* configure sleep slot for ARM rail */
+	reg = pmic_reg_read(dev, RN5T567_DC2_SLOT);
+	reg = (reg & 0xf0) | reg >> 4;
+	pmic_reg_write(dev, RN5T567_DC2_SLOT, reg);
+
+	/* disable LDO2 discharge to avoid backfeeding from +V3.3_SD */
+	pmic_clrsetbits(dev, RN5T567_LDODIS1, 0x2, 0);
 
 	return 0;
 }
@@ -394,7 +416,7 @@ ulong board_get_usable_ram_top(ulong total_size)
 {
 	/* Reserve last 1MiB for M4 on modules with 256MiB RAM */
 	if (gd->ram_size == SZ_256M)
-		return gd->ram_top - SZ_1M;
+		return gd->ram_top - SZ_2M;
 	else
 		return gd->ram_top;
 }
@@ -403,12 +425,19 @@ ulong board_get_usable_ram_top(ulong total_size)
 #if defined(CONFIG_OF_LIBFDT) && defined(CONFIG_OF_BOARD_SETUP)
 int ft_board_setup(void *blob, bd_t *bd)
 {
-#if defined(CONFIG_IMX_BOOTAUX)
-	int up;
+	int ret = 0;
+#if defined(CONFIG_FDT_FIXUP_PARTITIONS)
+	static struct node_info nodes[] = {
+		{ "fsl,imx7d-gpmi-nand", MTD_DEV_TYPE_NAND, }, /* NAND flash */
+	};
 
-	up = arch_auxiliary_core_check_up(0);
-	if (up) {
-		int ret;
+	/* Update partition nodes using info from mtdparts env var */
+	puts("   Updating MTD partitions...\n");
+	fdt_fixup_mtdparts(blob, nodes, ARRAY_SIZE(nodes));
+#endif
+#if defined(CONFIG_IMX_BOOTAUX)
+	ret = arch_auxiliary_core_check_up(0);
+	if (ret) {
 		int areas = 1;
 		u64 start[2], size[2];
 
@@ -417,7 +446,7 @@ int ft_board_setup(void *blob, bd_t *bd)
 		 * alignment for Linux due to MMU section size restrictions).
 		 */
 		start[0] = gd->bd->bi_dram[0].start;
-		size[0] = SZ_256M - SZ_1M;
+		size[0] = SZ_256M - SZ_2M;
 
 		/* If needed, create a second entry for memory beyond 256M */
 		if (gd->bd->bi_dram[0].size > SZ_256M) {
@@ -465,5 +494,19 @@ int board_ehci_hcd_init(int port)
 		return -EINVAL;
 	}
 	return 0;
+}
+
+int board_usb_phy_mode(int port)
+{
+	switch (port) {
+	case 0:
+		if (gpio_get_value(USB_CDET_GPIO))
+			return USB_INIT_DEVICE;
+		else
+			return USB_INIT_HOST;
+	case 1:
+	default:
+		return USB_INIT_HOST;
+	}
 }
 #endif

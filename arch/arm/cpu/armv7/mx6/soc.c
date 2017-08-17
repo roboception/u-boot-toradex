@@ -645,16 +645,30 @@ void imx_setup_hdmi(void)
 #endif
 
 #ifdef CONFIG_IMX_BOOTAUX
-int arch_auxiliary_core_up(u32 core_id, u32 boot_private_data)
+#ifdef CONFIG_MX6SX
+const struct memorymap hostmap[] = {
+	{ .auxcore = 0x00000000, .host = 0x007f8000, .size = 0x8000 },
+	{ .auxcore = 0x1fff8000, .host = 0x007f8000, .size = 0x8000 },
+	{ .auxcore = 0x20000000, .host = 0x00800000, .size = 0x8000 },
+	{ .auxcore = 0x00900000, .host = 0x00900000, .size = 0x20000 },
+	{ .auxcore = 0x20900000, .host = 0x00900000, .size = 0x20000 },
+	{ .auxcore = 0x10000000, .host = 0x80000000, .size = 0x0fff0000 },
+	{ .auxcore = 0x80000000, .host = 0x80000000, .size = 0xe0000000 },
+	{ /* sentinel */ }
+#endif
+
+/*
+ * Per the cortex-M reference manual, the reset vector of M4 needs
+ * to exist at 0x0 (TCMUL). The PC and SP are the first two addresses
+ * of that vector.  So to boot M4, the A core must build the M4's reset
+ * vector with getting the PC and SP from image and filling them to
+ * TCMUL. When M4 is kicked, it will load the PC and SP by itself.
+ * The TCMUL is mapped to (M4_BOOTROM_BASE_ADDR) at A core side for
+ * accessing the M4 TCMUL.
+ */
+int arch_auxiliary_core_up(u32 core_id, u32 stack, u32 pc)
 {
 	struct src *src_reg;
-	u32 stack, pc;
-
-	if (!boot_private_data)
-		return -EINVAL;
-
-	stack = *(u32 *)boot_private_data;
-	pc = *(u32 *)(boot_private_data + 4);
 
 	/* Set the stack and pc to M4 bootROM */
 	writel(stack, M4_BOOTROM_BASE_ADDR);

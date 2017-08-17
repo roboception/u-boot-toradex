@@ -308,16 +308,35 @@ void imx_get_mac_from_fuse(int dev_id, unsigned char *mac)
 #endif
 
 #ifdef CONFIG_IMX_BOOTAUX
-int arch_auxiliary_core_up(u32 core_id, u32 boot_private_data)
+const struct memorymap hostmap[] = {
+	{ .auxcore = 0x00000000, .host = 0x00180000, .size = 0x8000 },
+	{ .auxcore = 0x00180000, .host = 0x00180000, .size = 0x8000 },
+	{ .auxcore = 0x20180000, .host = 0x00180000, .size = 0x8000 },
+	{ .auxcore = 0x1fff8000, .host = 0x007f8000, .size = 0x8000 },
+	{ .auxcore = 0x20000000, .host = 0x00800000, .size = 0x8000 },
+	{ .auxcore = 0x00900000, .host = 0x00900000, .size = 0x20000 },
+	{ .auxcore = 0x20200000, .host = 0x00900000, .size = 0x20000 },
+	{ .auxcore = 0x00920000, .host = 0x00920000, .size = 0x20000 },
+	{ .auxcore = 0x20220000, .host = 0x00920000, .size = 0x20000 },
+	{ .auxcore = 0x00940000, .host = 0x00940000, .size = 0x20000 },
+	{ .auxcore = 0x20240000, .host = 0x00940000, .size = 0x20000 },
+	{ .auxcore = 0x10000000, .host = 0x80000000, .size = 0x0fff0000 },
+	{ .auxcore = 0x80000000, .host = 0x80000000, .size = 0xe0000000 },
+	{ /* sentinel */ }
+};
+
+/*
+ * Per the cortex-M reference manual, the reset vector of M4 needs
+ * to exist at 0x0 (TCMUL). The PC and SP are the first two addresses
+ * of that vector.  So to boot M4, the A core must build the M4's reset
+ * vector with getting the PC and SP from image and filling them to
+ * TCMUL. When M4 is kicked, it will load the PC and SP by itself.
+ * The TCMUL is mapped to (M4_BOOTROM_BASE_ADDR) at A core side for
+ * accessing the M4 TCMUL.
+ */
+int arch_auxiliary_core_up(u32 core_id, u32 stack, u32 pc)
 {
-	u32 stack, pc;
 	struct src *src_reg = (struct src *)SRC_BASE_ADDR;
-
-	if (!boot_private_data)
-		return 1;
-
-	stack = *(u32 *)boot_private_data;
-	pc = *(u32 *)(boot_private_data + 4);
 
 	/* Set the stack and pc to M4 bootROM */
 	writel(stack, M4_BOOTROM_BASE_ADDR);
@@ -412,6 +431,9 @@ enum boot_device get_boot_device(void)
 		break;
 	case BOOT_TYPE_SPINOR:
 		boot_dev = SPI_NOR_BOOT;
+		break;
+	case BOOT_TYPE_USB_SDP:
+		boot_dev = USB_SDP_BOOT;
 		break;
 	default:
 		break;
