@@ -142,11 +142,11 @@
 		"console=${console},${baudrate}n8 debug_uartport=lsport,0 " \
 		"${memargs}\0" \
 	"chkpin200=if gpio input A3; then echo pin 200 (A3) is low && false; else " \
-		"echo pin 200 (A3) is high && true; fi;\0" \
+		"echo pin 200 (A3) is high && true; fi\0" \
 	"chkpin204=if gpio input A2; then echo pin 204 (A2) is low && false; else " \
-		"echo pin 204 (A2) is high && true; fi;\0" \
+		"echo pin 204 (A2) is high && true; fi\0" \
 	"pinupdate=if run chkpin200 && run chkpin204 ; then echo pinupdate: starting tftp update && " \
-		"run tftpupdate && true; else echo pinupdate: skipping tftp update && false; fi;\0" \
+		"run tftpupdate && true; else echo pinupdate: skipping tftp update && false; fi\0" \
 	"reload_defaults=env default -a; saveenv; saveenv\0" \
 	"forever=while true; do; done\0" \
 	"reload_on_reset=setenv bootcmd 'run reload_defaults; reset'; saveenv; saveenv\0" \
@@ -165,16 +165,17 @@
 	"disable_green=i2c mw 0x32 16 00\0" \
 	"disable_blue=i2c mw 0x32 17 00\0" \
 	"init_eth=setenv autoload false; if env exists ethaddr; then; else setenv " \
-		"ethaddr 00:14:2d:00:00:00; fi; pci enum;\0" \
+		"ethaddr 00:14:2d:00:00:00; fi; pci enum\0" \
 	"chkupdscr=if tftpboot ${loadaddr} flash_eth.img; then echo update script " \
-		"accessible && true; else echo update script not accessible && false; fi;\0" \
+		"accessible && true; else echo update script not accessible && false; fi\0" \
 	"tftp_try_connect=run init_eth; setenv serverip 192.168.10.1; setenv ipaddr 192.168.10.2; setenv netmask 255.255.255.0; " \
-		"until run chkupdscr; do echo try to reconnect && run init_eth; done;\0" \
+		"until run chkupdscr; do echo try to reconnect && run init_eth; done\0" \
 	"tftpupdate=run blink_init; run blink_white; run tftp_try_connect; " \
 		"run blink_disable; run disable_white; run enable_blue; run blink_blue; " \
 		"run setethupdate && run update_followup && " \
 		"run blink_disable && run disable_blue && run enable_green && run blink_green && " \
-		"run set_out2_high; run reload_on_reset\0" \
+		"run set_out2_high && setenv tftp_success 1; run reload_on_reset; " \
+		"if env exists tftp_success; then true; else false; fi\0" \
 	"set_out2_high=gpio set H1\0" \
 	USB_BOOTCMD \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
