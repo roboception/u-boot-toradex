@@ -174,7 +174,7 @@
 		"run blink_disable; run disable_white; run enable_blue; run blink_blue; " \
 		"run setethupdate && run update_followup && " \
 		"run blink_disable && run disable_blue && run enable_green && run blink_green && " \
-		"run set_out2_high && setenv tftp_success 1; run reload_on_reset; " \
+		"setenv tftp_success 1 && run set_out2_high; run reload_on_reset; " \
 		"if env exists tftp_success; then true; else false; fi\0" \
 	"set_out2_high=gpio set H1\0" \
 	USB_BOOTCMD \
