@@ -178,7 +178,7 @@
 		"setenv tftp_success 1 && run set_out2_high; run reload_on_reset; " \
 		"if env exists tftp_success; then true; else false; fi\0" \
 	"set_out2_high=gpio set H1\0" \
-	"set_out1_high=gpio reset H0\0" \
+	"set_out1_high=gpio clear H0\0" \
 	USB_BOOTCMD \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 
