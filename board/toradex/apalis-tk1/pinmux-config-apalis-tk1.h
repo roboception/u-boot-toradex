@@ -20,6 +20,8 @@ static const struct tegra_gpio_config apalis_tk1_gpio_inits[] = {
 	GPIO_INIT(A,    3,   IN),
 	GPIO_INIT(B,    1,   IN),
 	GPIO_INIT(C,    0,   OUT0),
+	GPIO_INIT(H,    0,   OUT0), /* GPIO_OUT1 */
+	GPIO_INIT(H,    1,   OUT0), /* GPIO_OUT2 */
 	GPIO_INIT(I,    5,   IN),
 	GPIO_INIT(I,    6,   IN),
 	GPIO_INIT(J,    0,   IN),

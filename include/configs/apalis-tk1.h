@@ -118,6 +118,7 @@
 		"${soc}-apalis-${fdt_board}.dtb " \
 		"&& setenv dtbparam ${fdt_addr_r}\0"
 
+/* chkpin200, chkpin204, set_out1_high and set_out2_low relate to the logic level of the rc_visard, not the TK1 */
 #define BOARD_EXTRA_ENV_SETTINGS \
 	"boot_file=boot/uImage\0" \
 	"console=ttyS0\0" \
@@ -177,6 +178,7 @@
 		"setenv tftp_success 1 && run set_out2_high; run reload_on_reset; " \
 		"if env exists tftp_success; then true; else false; fi\0" \
 	"set_out2_high=gpio set H1\0" \
+	"set_out1_high=gpio reset H0\0" \
 	USB_BOOTCMD \
 	"vidargs=video=tegrafb0:640x480-16@60 fbcon=map:1\0"
 
