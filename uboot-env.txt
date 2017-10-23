@@ -87,6 +87,7 @@ sdboot=run setup; setenv bootargs ${defargs} ${sdargs} ${setupargs} ${vidargs}; 
 sddtbload=setenv dtbparam; load mmc 1:1 ${fdt_addr_r} ${soc}-apalis-${fdt_board}.dtb && setenv dtbparam ${fdt_addr_r}
 serverip=192.168.10.1
 setethupdate=if env exists ethaddr; then; else setenv ethaddr 00:14:2d:00:00:00; fi; pci enum && tftpboot ${loadaddr} flash_eth.img && source ${loadaddr}
+set_out1_high=gpio clear H0
 set_out2_high=gpio set H1
 setsdupdate=setenv interface mmc; setenv drive 1; mmc rescan; load ${interface} ${drive}:1 ${loadaddr} flash_blk.img || setenv drive 2; mmc rescan; load ${interface} ${drive}:1 ${loadaddr} flash_blk.img && source ${loadaddr}
 setup=setenv setupargs igb_mac=${ethaddr} consoleblank=0 no_console_suspend=1 console=tty1 console=${console},${baudrate}n8 debug_uartport=lsport,0 ${memargs}
